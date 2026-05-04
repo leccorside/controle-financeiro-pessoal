@@ -1,0 +1,56 @@
+const { generateInsights } = require('../services/aiService');
+const prisma = require('../lib/prisma');
+
+const getAIInsights = async (req, res) => {
+  try {
+    const { month, year } = req.query;
+
+    // 1. Buscar dados reais do banco para o resumo
+    const where = { userId: req.user.id };
+    if (month && month !== 'all') {
+      const startDate = new Date(parseInt(year), parseInt(month), 1);
+      const endDate = new Date(parseInt(year), parseInt(month) + 1, 0);
+      where.date = { gte: startDate, lte: endDate };
+    } else if (year) {
+      const startDate = new Date(parseInt(year), 0, 1);
+      const endDate = new Date(parseInt(year), 11, 31, 23, 59, 59);
+      where.date = { gte: startDate, lte: endDate };
+    }
+
+    const transactions = await prisma.transaction.findMany({ where });
+    
+    // Calcular resumo para o prompt
+    const summary = transactions.reduce((acc, t) => {
+      if (t.type === 'INCOME') acc.income += t.amount;
+      if (t.type === 'EXPENSE') acc.expense += t.amount;
+      if (t.type === 'INVESTMENT') acc.investment += t.amount;
+      return acc;
+    }, { income: 0, expense: 0, investment: 0 });
+
+    summary.balance = summary.income - summary.expense;
+
+    const categorySpending = await prisma.transaction.groupBy({
+      by: ['categoryId'],
+      where: { ...where, type: 'EXPENSE' },
+      _sum: { amount: true }
+    });
+
+    const categories = await prisma.category.findMany({
+      where: { id: { in: categorySpending.map(c => c.categoryId) } }
+    });
+
+    summary.categorySpending = categorySpending.map(cs => ({
+      name: categories.find(c => c.id === cs.categoryId)?.name || 'Outros',
+      value: cs._sum.amount
+    }));
+
+    // 2. Chamar o serviço de IA
+    const insights = await generateInsights(summary);
+    
+    res.json(insights);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+module.exports = { getAIInsights };
