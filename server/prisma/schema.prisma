@@ -1,0 +1,65 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  categories   Category[]
+  transactions Transaction[]
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  name      String
+  type      TransactionType
+  color     String
+  icon      String
+  userId    String?  // Nullable se for uma categoria global
+  user      User?    @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+
+  transactions Transaction[]
+}
+
+model Transaction {
+  id          String            @id @default(uuid())
+  description String
+  amount      Float
+  type        TransactionType
+  status      TransactionStatus @default(PENDING)
+  date        DateTime
+  userId      String
+  user        User              @relation(fields: [userId], references: [id])
+  categoryId  String
+  category    Category          @relation(fields: [categoryId], references: [id])
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+  INVESTMENT
+}
+
+enum TransactionStatus {
+  PAID
+  PENDING
+  OVERDUE
+}
