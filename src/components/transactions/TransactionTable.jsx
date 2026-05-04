@@ -96,7 +96,7 @@ export function TransactionTable({ transactions, onEdit, onDelete }) {
                   </select>
                 </td>
                 <td className="px-6 py-4 text-muted-foreground">
-                  {new Date(transaction.date).toLocaleDateString('pt-BR')}
+                  {new Date(transaction.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}
                 </td>
                 <td className={cn(
                   "px-6 py-4 text-right font-semibold",

@@ -4,7 +4,11 @@ import { Search, Calendar, Tag, Layers, CheckCircle2 } from 'lucide-react';
 import { useCategories } from '../../hooks/useCategories';
 
 export function TransactionFilters({ filters, setFilters }) {
-  const { categories } = useCategories();
+  const { categories, fetchCategories } = useCategories();
+
+  React.useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
 
   const handleFilterChange = (key, value) => {
     setFilters(prev => ({ ...prev, [key]: value }));
