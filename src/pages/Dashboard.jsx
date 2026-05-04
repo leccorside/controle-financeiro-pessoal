@@ -234,11 +234,16 @@ export default function Dashboard() {
           <CardContent className="h-[350px] flex flex-row items-center gap-2 md:gap-4 overflow-hidden">
             <div className="flex flex-col justify-center gap-3 pl-2 md:pl-4 min-w-[100px] md:min-w-[150px]">
               {currentData.categorySpending.map((category) => (
-                <div key={category.name} className="flex items-center gap-3 group cursor-default">
-                  <div className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: category.color }} />
-                  <span className="text-xs text-muted-foreground font-medium group-hover:text-foreground transition-colors">
-                    {category.name}
-                  </span>
+                <div key={category.name} className="flex items-start gap-3 group cursor-default">
+                  <div className="w-3 h-3 rounded-full shadow-sm mt-1" style={{ backgroundColor: category.color }} />
+                  <div className="flex flex-col">
+                    <span className="text-xs text-muted-foreground font-medium group-hover:text-foreground transition-colors">
+                      {category.name}
+                    </span>
+                    <span className="text-[10px] font-bold text-foreground/80">
+                      {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(category.value)}
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>
