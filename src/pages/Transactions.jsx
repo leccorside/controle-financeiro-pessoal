@@ -1,21 +1,41 @@
 import React, { useState } from 'react';
+import { useTransactions } from '../hooks/useTransactions';
 import { TransactionTable } from '../components/transactions/TransactionTable';
 import { TransactionFilters } from '../components/transactions/TransactionFilters';
+import { TransactionForm } from '../components/transactions/TransactionForm';
 import { Button } from '../components/ui/Button';
+import { Modal } from '../ui/Modal';
 import { Plus, Download } from 'lucide-react';
 
-const mockTransactions = [
-  { id: '1', description: 'Salário Mensal', type: 'INCOME', category: 'Trabalho', date: '2026-05-01', amount: 8500.00 },
-  { id: '2', description: 'Aluguel Apartamento', type: 'EXPENSE', category: 'Moradia', date: '2026-05-05', amount: 2500.00 },
-  { id: '3', description: 'Supermercado', type: 'EXPENSE', category: 'Alimentação', date: '2026-05-06', amount: 850.40 },
-  { id: '4', description: 'Freelance Design', type: 'INCOME', category: 'Trabalho', date: '2026-05-10', amount: 1200.00 },
-  { id: '5', description: 'Assinatura Netflix', type: 'EXPENSE', category: 'Lazer', date: '2026-05-12', amount: 55.90 },
-  { id: '6', description: 'Conta de Luz', type: 'EXPENSE', category: 'Contas Fixas', date: '2026-05-15', amount: 210.15 },
-  { id: '7', description: 'Restaurante Fim de Semana', type: 'EXPENSE', category: 'Alimentação', date: '2026-05-16', amount: 180.00 },
-];
-
 export default function Transactions() {
-  const [transactions] = useState(mockTransactions);
+  const { transactions, addTransaction, removeTransaction, updateTransaction } = useTransactions();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState(null);
+
+  const handleOpenCreateModal = () => {
+    setEditingTransaction(null);
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEditModal = (transaction) => {
+    setEditingTransaction(transaction);
+    setIsModalOpen(true);
+  };
+
+  const handleSubmit = (data) => {
+    if (editingTransaction) {
+      updateTransaction(editingTransaction.id, data);
+    } else {
+      addTransaction(data);
+    }
+    setIsModalOpen(false);
+  };
+
+  const handleDelete = (id) => {
+    if (confirm('Tem certeza que deseja excluir esta transação?')) {
+      removeTransaction(id);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -29,7 +49,7 @@ export default function Transactions() {
             <Download size={18} />
             Exportar
           </Button>
-          <Button className="gap-2 shadow-lg shadow-primary/20">
+          <Button className="gap-2 shadow-lg shadow-primary/20" onClick={handleOpenCreateModal}>
             <Plus size={18} />
             Nova Transação
           </Button>
@@ -38,7 +58,11 @@ export default function Transactions() {
 
       <TransactionFilters />
 
-      <TransactionTable transactions={transactions} />
+      <TransactionTable 
+        transactions={transactions} 
+        onEdit={handleOpenEditModal}
+        onDelete={handleDelete}
+      />
 
       <div className="flex items-center justify-between text-sm text-muted-foreground px-2">
         <p>Mostrando {transactions.length} transações</p>
@@ -47,6 +71,18 @@ export default function Transactions() {
           <Button variant="outline" size="sm" disabled>Próximo</Button>
         </div>
       </div>
+
+      <Modal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)}
+        title={editingTransaction ? 'Editar Transação' : 'Nova Transação'}
+      >
+        <TransactionForm 
+          onSubmit={handleSubmit}
+          onCancel={() => setIsModalOpen(false)}
+          defaultValues={editingTransaction}
+        />
+      </Modal>
     </div>
   );
 }

@@ -1,9 +1,9 @@
 import React from 'react';
 import { cn } from '../../services/utils';
-import { ArrowUpCircle, ArrowDownCircle, MoreVertical, Search } from 'lucide-react';
+import { ArrowUpCircle, ArrowDownCircle, Edit2, Trash2, Search } from 'lucide-react';
 import { Button } from '../ui/Button';
 
-export function TransactionTable({ transactions }) {
+export function TransactionTable({ transactions, onEdit, onDelete }) {
   return (
     <div className="w-full overflow-x-auto rounded-xl border border-border bg-card">
       <table className="w-full text-sm text-left border-collapse">
@@ -55,9 +55,24 @@ export function TransactionTable({ transactions }) {
                   {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(transaction.amount)}
                 </td>
                 <td className="px-6 py-4 text-center">
-                  <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <MoreVertical size={16} />
-                  </Button>
+                  <div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 text-muted-foreground hover:text-primary"
+                      onClick={() => onEdit(transaction)}
+                    >
+                      <Edit2 size={16} />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                      onClick={() => onDelete(transaction.id)}
+                    >
+                      <Trash2 size={16} />
+                    </Button>
+                  </div>
                 </td>
               </tr>
             ))
