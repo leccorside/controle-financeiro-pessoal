@@ -40,12 +40,12 @@ export default function Categories() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1">
           <h2 className="text-3xl font-bold font-heading tracking-tight">Categorias</h2>
           <p className="text-muted-foreground">Organize suas transações por grupos personalizados.</p>
         </div>
-        <Button className="gap-2 shadow-lg shadow-primary/20" onClick={handleOpenCreateModal}>
+        <Button className="w-full sm:w-auto gap-2 shadow-lg shadow-primary/20" onClick={handleOpenCreateModal}>
           <Plus size={18} />
           Nova Categoria
         </Button>
