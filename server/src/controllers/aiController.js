@@ -29,7 +29,6 @@ const getAIInsights = async (req, res) => {
 
     // Verificar se a API Key está configurada antes de chamar o serviço
     const provider = process.env.AI_PROVIDER || 'gemini';
-    console.log(`[AI Controller Debug] Provider em uso: "${provider}"`);
     const hasApiKey = (provider === 'openai' && process.env.OPENAI_API_KEY) || 
                       (provider === 'gemini' && process.env.GEMINI_API_KEY) ||
                       (provider === 'groq' && process.env.GROQ_API_KEY);
@@ -67,7 +66,6 @@ const getAIInsights = async (req, res) => {
     }));
 
     // 2. Chamar o serviço de IA
-    console.log("[AI Controller] Chamando IA com resumo:", JSON.stringify(summary, null, 2));
     const insights = await generateInsights(summary);
     
     res.json(insights);
