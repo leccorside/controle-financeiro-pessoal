@@ -1,10 +1,13 @@
 @import "tailwindcss";
 
 @theme {
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-heading: "Outfit", sans-serif;
+
   --color-background: #09090b;
   --color-foreground: #fafafa;
   
-  --color-card: #18181b;
+  --color-card: #121214;
   --color-card-foreground: #fafafa;
   
   --color-primary: #8b5cf6;
@@ -13,34 +16,60 @@
   --color-secondary: #27272a;
   --color-secondary-foreground: #fafafa;
   
-  --color-muted: #27272a;
+  --color-muted: #18181b;
   --color-muted-foreground: #a1a1aa;
   
   --color-accent: #27272a;
   --color-accent-foreground: #fafafa;
   
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
   --color-destructive: #ef4444;
-  --color-destructive-foreground: #fafafa;
 
   --color-border: #27272a;
-  --color-input: #27272a;
-  --color-ring: #d4d4d8;
+  --color-input: #18181b;
+  --color-ring: #8b5cf6;
 
-  --radius-lg: 0.75rem;
-  --radius-md: 0.5rem;
-  --radius-sm: 0.25rem;
+  --radius-lg: 1rem;
+  --radius-md: 0.75rem;
+  --radius-sm: 0.5rem;
+
+  --shadow-premium: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
 }
 
 @layer base {
   * {
     @apply border-border;
   }
+  
   body {
-    @apply bg-background text-foreground antialiased selection:bg-primary/30;
+    @apply bg-background text-foreground font-sans antialiased selection:bg-primary/30;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading tracking-tight;
   }
 }
 
-:root {
-  color-scheme: dark;
+/* Scrollbar Style */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-background;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-muted rounded-full border-2 border-background hover:bg-muted-foreground/30 transition-colors;
+}
+
+/* Tema Light (opcional para o futuro, mas preparado) */
+.light {
+  --color-background: #ffffff;
+  --color-foreground: #09090b;
+  --color-card: #f4f4f5;
+  --color-border: #e4e4e7;
+  --color-muted: #f4f4f5;
+  --color-muted-foreground: #71717a;
+  --color-input: #ffffff;
 }
