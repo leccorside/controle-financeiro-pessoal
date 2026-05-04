@@ -3,7 +3,7 @@ import { useCategories } from '../hooks/useCategories';
 import { CategoryForm } from '../components/categories/CategoryForm';
 import { Button } from '../components/ui/Button';
 import { Card, CardContent } from '../components/ui/Card';
-import { Modal } from '../ui/Modal';
+import { Modal } from '../components/ui/Modal';
 import { Plus, Edit2, Trash2 } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { cn } from '../services/utils';

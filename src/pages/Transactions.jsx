@@ -4,7 +4,7 @@ import { TransactionTable } from '../components/transactions/TransactionTable';
 import { TransactionFilters } from '../components/transactions/TransactionFilters';
 import { TransactionForm } from '../components/transactions/TransactionForm';
 import { Button } from '../components/ui/Button';
-import { Modal } from '../ui/Modal';
+import { Modal } from '../components/ui/Modal';
 import { Plus, Download } from 'lucide-react';
 
 export default function Transactions() {
