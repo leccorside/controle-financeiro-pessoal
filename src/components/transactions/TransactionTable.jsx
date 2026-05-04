@@ -1,9 +1,36 @@
 import React from 'react';
 import { cn } from '../../services/utils';
-import { ArrowUpCircle, ArrowDownCircle, Edit2, Trash2, Search } from 'lucide-react';
+import { ArrowUpCircle, ArrowDownCircle, TrendingUp, Edit2, Trash2 } from 'lucide-react';
 import { Button } from '../ui/Button';
 
 export function TransactionTable({ transactions, onEdit, onDelete }) {
+  const getIcon = (type) => {
+    switch (type) {
+      case 'INCOME': return <ArrowUpCircle className="text-success" size={16} />;
+      case 'EXPENSE': return <ArrowDownCircle className="text-destructive" size={16} />;
+      case 'INVESTMENT': return <TrendingUp className="text-blue-500" size={16} />;
+      default: return null;
+    }
+  };
+
+  const getTypeLabel = (type) => {
+    switch (type) {
+      case 'INCOME': return 'Receita';
+      case 'EXPENSE': return 'Despesa';
+      case 'INVESTMENT': return 'Investimento';
+      default: return type;
+    }
+  };
+
+  const getTypeColor = (type) => {
+    switch (type) {
+      case 'INCOME': return 'text-success';
+      case 'EXPENSE': return 'text-destructive';
+      case 'INVESTMENT': return 'text-blue-500';
+      default: return 'text-foreground';
+    }
+  };
+
   return (
     <div className="w-full overflow-x-auto rounded-xl border border-border bg-card">
       <table className="w-full text-sm text-left border-collapse">
@@ -26,16 +53,9 @@ export function TransactionTable({ transactions, onEdit, onDelete }) {
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-2">
-                    {transaction.type === 'INCOME' ? (
-                      <ArrowUpCircle className="text-success" size={16} />
-                    ) : (
-                      <ArrowDownCircle className="text-destructive" size={16} />
-                    )}
-                    <span className={cn(
-                      "text-xs font-medium",
-                      transaction.type === 'INCOME' ? "text-success" : "text-destructive"
-                    )}>
-                      {transaction.type === 'INCOME' ? 'Receita' : 'Despesa'}
+                    {getIcon(transaction.type)}
+                    <span className={cn("text-xs font-medium", getTypeColor(transaction.type))}>
+                      {getTypeLabel(transaction.type)}
                     </span>
                   </div>
                 </td>
@@ -49,7 +69,8 @@ export function TransactionTable({ transactions, onEdit, onDelete }) {
                 </td>
                 <td className={cn(
                   "px-6 py-4 text-right font-semibold",
-                  transaction.type === 'INCOME' ? "text-success" : "text-foreground"
+                  transaction.type === 'INCOME' ? "text-success" : 
+                  transaction.type === 'INVESTMENT' ? "text-blue-500" : "text-foreground"
                 )}>
                   {transaction.type === 'EXPENSE' && '- '}
                   {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(transaction.amount)}

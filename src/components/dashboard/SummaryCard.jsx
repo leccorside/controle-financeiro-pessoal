@@ -6,6 +6,7 @@ export function SummaryCard({ title, value, icon: Icon, trend, type = 'default' 
   const typeStyles = {
     income: 'text-success bg-success/10',
     expense: 'text-destructive bg-destructive/10',
+    investment: 'text-blue-500 bg-blue-500/10',
     default: 'text-primary bg-primary/10',
   };
 

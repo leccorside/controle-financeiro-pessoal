@@ -9,7 +9,7 @@ import * as LucideIcons from 'lucide-react';
 
 const categorySchema = z.object({
   name: z.string().min(2, 'O nome deve ter pelo menos 2 caracteres'),
-  type: z.enum(['INCOME', 'EXPENSE']),
+  type: z.enum(['INCOME', 'EXPENSE', 'INVESTMENT']),
   color: z.string().min(1, 'A cor é obrigatória'),
   icon: z.string().min(1, 'O ícone é obrigatório'),
 });
@@ -17,12 +17,12 @@ const categorySchema = z.object({
 const availableIcons = [
   'Briefcase', 'Utensils', 'Home', 'Palmtree', 'Activity', 
   'ShoppingBag', 'Car', 'Plane', 'Book', 'Music', 
-  'Smartphone', 'CreditCard', 'Gift', 'Coffee'
+  'Smartphone', 'CreditCard', 'Gift', 'Coffee', 'TrendingUp', 'PieChart', 'Wallet'
 ];
 
 const availableColors = [
   '#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#6366f1', 
-  '#8b5cf6', '#ec4899', '#71717a', '#0ea5e9', '#f97316'
+  '#8b5cf6', '#ec4899', '#71717a', '#0ea5e9', '#f97316', '#06b6d4'
 ];
 
 export function CategoryForm({ onSubmit, defaultValues, onCancel }) {
@@ -62,6 +62,13 @@ export function CategoryForm({ onSubmit, defaultValues, onCancel }) {
           <input type="radio" value="EXPENSE" {...register('type')} className="hidden" />
           Despesa
         </label>
+        <label className={cn(
+          "flex-1 text-center py-2 text-sm font-medium rounded-md cursor-pointer transition-all",
+          type === 'INVESTMENT' ? "bg-background text-blue-500 shadow-sm" : "text-muted-foreground"
+        )}>
+          <input type="radio" value="INVESTMENT" {...register('type')} className="hidden" />
+          Investimento
+        </label>
       </div>
 
       <div className="space-y-2">
@@ -92,7 +99,7 @@ export function CategoryForm({ onSubmit, defaultValues, onCancel }) {
         <label className="text-sm font-medium text-muted-foreground">Ícone</label>
         <div className="grid grid-cols-7 gap-2 max-h-32 overflow-y-auto p-2 border border-border rounded-md bg-input">
           {availableIcons.map((iconName) => {
-            const Icon = LucideIcons[iconName];
+            const Icon = LucideIcons[iconName] || LucideIcons.HelpCircle;
             return (
               <button
                 key={iconName}

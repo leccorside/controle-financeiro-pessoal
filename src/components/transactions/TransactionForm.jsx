@@ -9,7 +9,7 @@ import { cn } from '../../services/utils';
 const transactionSchema = z.object({
   description: z.string().min(3, 'A descrição deve ter pelo menos 3 caracteres'),
   amount: z.string().min(1, 'O valor é obrigatório'),
-  type: z.enum(['INCOME', 'EXPENSE']),
+  type: z.enum(['INCOME', 'EXPENSE', 'INVESTMENT']),
   category: z.string().min(1, 'A categoria é obrigatória'),
   date: z.string().min(1, 'A data é obrigatória'),
 });
@@ -54,6 +54,13 @@ export function TransactionForm({ onSubmit, defaultValues, onCancel }) {
           <input type="radio" value="EXPENSE" {...register('type')} className="hidden" />
           Despesa
         </label>
+        <label className={cn(
+          "flex-1 text-center py-2 text-sm font-medium rounded-md cursor-pointer transition-all",
+          type === 'INVESTMENT' ? "bg-background text-blue-500 shadow-sm" : "text-muted-foreground hover:text-foreground"
+        )}>
+          <input type="radio" value="INVESTMENT" {...register('type')} className="hidden" />
+          Investimento
+        </label>
       </div>
 
       <div className="space-y-2">
@@ -88,6 +95,7 @@ export function TransactionForm({ onSubmit, defaultValues, onCancel }) {
           <option value="Lazer">Lazer</option>
           <option value="Transporte">Transporte</option>
           <option value="Saúde">Saúde</option>
+          <option value="Investimentos">Investimentos</option>
         </select>
         {errors.category && <p className="text-xs text-destructive">{errors.category.message}</p>}
       </div>

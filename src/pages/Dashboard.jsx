@@ -7,7 +7,8 @@ import {
   TrendingDown, 
   Wallet, 
   PieChart as PieChartIcon,
-  BarChart as BarChartIcon
+  BarChart as BarChartIcon,
+  LineChart
 } from 'lucide-react';
 import { 
   BarChart, 
@@ -24,17 +25,18 @@ import {
 
 const mockData = {
   summary: {
-    balance: 12500.50,
+    balance: 15200.50,
     income: 18400.00,
     expenses: 5899.50,
+    investments: 2700.00,
   },
   monthlyEvolution: [
-    { name: 'Jan', income: 4000, expense: 2400 },
-    { name: 'Fev', income: 3000, expense: 1398 },
-    { name: 'Mar', income: 2000, expense: 9800 },
-    { name: 'Abr', income: 2780, expense: 3908 },
-    { name: 'Mai', income: 1890, expense: 4800 },
-    { name: 'Jun', income: 2390, expense: 3800 },
+    { name: 'Jan', income: 4000, expense: 2400, investment: 500 },
+    { name: 'Fev', income: 3000, expense: 1398, investment: 800 },
+    { name: 'Mar', income: 2000, expense: 9800, investment: 200 },
+    { name: 'Abr', income: 2780, expense: 3908, investment: 1200 },
+    { name: 'Mai', income: 1890, expense: 4800, investment: 600 },
+    { name: 'Jun', income: 2390, expense: 3800, investment: 1500 },
   ],
   categorySpending: [
     { name: 'Alimentação', value: 2400, color: '#8b5cf6' },
@@ -42,6 +44,8 @@ const mockData = {
     { name: 'Lazer', value: 1200, color: '#f59e0b' },
     { name: 'Saúde', value: 500, color: '#ef4444' },
     { name: 'Educação', value: 999.50, color: '#6366f1' },
+    { name: 'Ações', value: 1500, color: '#3b82f6' },
+    { name: 'Cripto', value: 1200, color: '#06b6d4' },
   ]
 };
 
@@ -54,7 +58,7 @@ export default function Dashboard() {
       </div>
 
       {/* Cards de Resumo */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <SummaryCard 
           title="Saldo Atual" 
           value={mockData.summary.balance} 
@@ -75,6 +79,13 @@ export default function Dashboard() {
           type="expense"
           trend={-2}
         />
+        <SummaryCard 
+          title="Investimentos" 
+          value={mockData.summary.investments} 
+          icon={LineChart} 
+          type="investment"
+          trend={15}
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -85,7 +96,7 @@ export default function Dashboard() {
               <BarChartIcon size={20} className="text-primary" />
               <CardTitle>Fluxo de Caixa</CardTitle>
             </div>
-            <CardDescription>Comparativo mensal entre receitas e despesas.</CardDescription>
+            <CardDescription>Comparativo mensal entre receitas, despesas e aportes.</CardDescription>
           </CardHeader>
           <CardContent className="h-[350px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -113,8 +124,9 @@ export default function Dashboard() {
                   }}
                   itemStyle={{ fontSize: '12px' }}
                 />
-                <Bar dataKey="income" name="Receita" fill="#10b981" radius={[4, 4, 0, 0]} barSize={20} />
-                <Bar dataKey="expense" name="Despesa" fill="#ef4444" radius={[4, 4, 0, 0]} barSize={20} />
+                <Bar dataKey="income" name="Receita" fill="#10b981" radius={[4, 4, 0, 0]} barSize={15} />
+                <Bar dataKey="expense" name="Despesa" fill="#ef4444" radius={[4, 4, 0, 0]} barSize={15} />
+                <Bar dataKey="investment" name="Investimento" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={15} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
