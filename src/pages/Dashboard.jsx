@@ -129,39 +129,46 @@ export default function Dashboard() {
             </div>
             <CardDescription>Distribuição das suas despesas este mês.</CardDescription>
           </CardHeader>
-          <CardContent className="h-[350px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={mockData.categorySpending}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={80}
-                  outerRadius={110}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {mockData.categorySpending.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
-                  ))}
-                </Pie>
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'var(--card)', 
-                    border: '1px solid var(--border)',
-                    borderRadius: '8px',
-                    color: 'var(--foreground)'
-                  }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="flex flex-wrap justify-center gap-4 mt-4">
+          <CardContent className="h-[350px] flex flex-col md:flex-row items-center gap-4">
+            {/* Legenda na Esquerda */}
+            <div className="flex flex-col justify-center gap-3 pl-4 min-w-[150px]">
               {mockData.categorySpending.map((category) => (
-                <div key={category.name} className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: category.color }} />
-                  <span className="text-xs text-muted-foreground">{category.name}</span>
+                <div key={category.name} className="flex items-center gap-3 group cursor-default">
+                  <div className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: category.color }} />
+                  <span className="text-xs text-muted-foreground font-medium group-hover:text-foreground transition-colors">
+                    {category.name}
+                  </span>
                 </div>
               ))}
+            </div>
+            
+            {/* Gráfico na Direita */}
+            <div className="flex-1 w-full h-full min-h-[250px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={mockData.categorySpending}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={70}
+                    outerRadius={100}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {mockData.categorySpending.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'var(--card)', 
+                      border: '1px solid var(--border)',
+                      borderRadius: '8px',
+                      color: 'var(--foreground)'
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>
