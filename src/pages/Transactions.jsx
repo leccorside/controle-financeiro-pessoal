@@ -1,23 +1,28 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useTransactions } from '../hooks/useTransactions';
+import { useCategories } from '../hooks/useCategories';
 import { TransactionTable } from '../components/transactions/TransactionTable';
 import { TransactionFilters } from '../components/transactions/TransactionFilters';
 import { TransactionForm } from '../components/transactions/TransactionForm';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
-import { Plus, Download, FileText, Table as TableIcon, ChevronDown } from 'lucide-react';
+import { Plus, Download, FileText, Table as TableIcon, ChevronDown, Upload, Loader2 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import Papa from 'papaparse';
 import { cn } from '../services/utils';
 
 export default function Transactions() {
   const { transactions, fetchTransactions, addTransaction, removeTransaction, updateTransaction } = useTransactions();
+  const { categories, fetchCategories } = useCategories();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState(null);
   const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const exportMenuRef = useRef(null);
   
+  const exportMenuRef = useRef(null);
+  const fileInputRef = useRef(null);
   const itemsPerPage = 20;
 
   const [filters, setFilters] = useState({
@@ -31,10 +36,10 @@ export default function Transactions() {
 
   useEffect(() => {
     fetchTransactions(filters);
-    setCurrentPage(1); // Resetar para primeira página ao filtrar
-  }, [fetchTransactions, filters.month, filters.year, filters.type, filters.category, filters.status]);
+    fetchCategories();
+    setCurrentPage(1);
+  }, [fetchTransactions, fetchCategories, filters.month, filters.year, filters.type, filters.category, filters.status]);
 
-  // Fechar menu de exportação ao clicar fora
   useEffect(() => {
     function handleClickOutside(event) {
       if (exportMenuRef.current && !exportMenuRef.current.contains(event.target)) {
@@ -53,7 +58,6 @@ export default function Transactions() {
     });
   }, [transactions, filters.searchTerm]);
 
-  // Lógica de Paginação
   const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
   const paginatedTransactions = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -96,11 +100,7 @@ export default function Transactions() {
       t.amount.toFixed(2)
     ]);
 
-    const csvContent = [
-      headers.join(','),
-      ...rows.map(e => e.join(','))
-    ].join('\n');
-
+    const csvContent = Papa.unparse({ fields: headers, data: rows });
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
@@ -113,12 +113,66 @@ export default function Transactions() {
     setIsExportMenuOpen(false);
   };
 
+  const handleImportCSV = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    setIsImporting(true);
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: async (results) => {
+        try {
+          const importedData = results.data;
+          let count = 0;
+
+          for (const row of importedData) {
+            // Mapeamento inverso
+            const typeMap = { 'Receita': 'INCOME', 'Despesa': 'EXPENSE', 'Investimento': 'INVESTMENT' };
+            
+            // Converter data DD/MM/YYYY para YYYY-MM-DD
+            const [day, month, year] = row['Data'].split('/');
+            const isoDate = `${year}-${month}-${day}`;
+
+            // Encontrar categoria pelo nome
+            const categoryName = row['Categoria'];
+            const category = categories.find(c => c.name === categoryName);
+
+            if (!category) {
+              console.warn(`Categoria não encontrada: ${categoryName}`);
+              continue;
+            }
+
+            const transactionData = {
+              description: row['Descrição'],
+              amount: row['Valor'].replace(',', '.'), // Garantir ponto decimal
+              type: typeMap[row['Tipo']] || 'EXPENSE',
+              categoryId: category.id,
+              status: row['Status'] || 'PENDING',
+              date: isoDate
+            };
+
+            await addTransaction(transactionData);
+            count++;
+          }
+
+          alert(`${count} transações importadas com sucesso!`);
+          fetchTransactions(filters);
+        } catch (error) {
+          console.error('Erro ao importar CSV:', error);
+          alert('Erro ao processar o arquivo CSV. Verifique o formato.');
+        } finally {
+          setIsImporting(false);
+          event.target.value = ''; // Reset input
+        }
+      }
+    });
+  };
+
   const exportToPDF = () => {
     const doc = new jsPDF();
-    
     doc.setFontSize(18);
     doc.text('Relatório de Transações - Financeiro Pro', 14, 22);
-    
     doc.setFontSize(11);
     doc.setTextColor(100);
     doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, 14, 30);
@@ -152,7 +206,25 @@ export default function Transactions() {
           <h2 className="text-3xl font-bold font-heading tracking-tight">Transações</h2>
           <p className="text-muted-foreground">Gerencie seu histórico financeiro detalhado.</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          {/* Botão Importar */}
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            onChange={handleImportCSV} 
+            accept=".csv" 
+            className="hidden" 
+          />
+          <Button 
+            variant="outline" 
+            className="gap-2" 
+            onClick={() => fileInputRef.current.click()}
+            disabled={isImporting}
+          >
+            {isImporting ? <Loader2 size={18} className="animate-spin" /> : <Upload size={18} />}
+            Importar CSV
+          </Button>
+
           {/* Dropdown de Exportação */}
           <div className="relative" ref={exportMenuRef}>
             <Button 
