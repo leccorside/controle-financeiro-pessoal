@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useTransactions } from '../hooks/useTransactions';
 import { TransactionTable } from '../components/transactions/TransactionTable';
 import { TransactionFilters } from '../components/transactions/TransactionFilters';
@@ -11,6 +11,14 @@ export default function Transactions() {
   const { transactions, addTransaction, removeTransaction, updateTransaction } = useTransactions();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredTransactions = useMemo(() => {
+    return transactions.filter(t => 
+      t.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      t.category.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [transactions, searchTerm]);
 
   const handleOpenCreateModal = () => {
     setEditingTransaction(null);
@@ -56,16 +64,16 @@ export default function Transactions() {
         </div>
       </div>
 
-      <TransactionFilters />
+      <TransactionFilters searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
 
       <TransactionTable 
-        transactions={transactions} 
+        transactions={filteredTransactions} 
         onEdit={handleOpenEditModal}
         onDelete={handleDelete}
       />
 
       <div className="flex items-center justify-between text-sm text-muted-foreground px-2">
-        <p>Mostrando {transactions.length} transações</p>
+        <p>Mostrando {filteredTransactions.length} de {transactions.length} transações</p>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" disabled>Anterior</Button>
           <Button variant="outline" size="sm" disabled>Próximo</Button>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -18,6 +18,14 @@ export default function Admin() {
   const [users, setUsers] = useState(mockUsers);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredUsers = useMemo(() => {
+    return users.filter(u => 
+      u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      u.email.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [users, searchTerm]);
 
   const handleOpenCreateModal = () => {
     setEditingUser(null);
@@ -68,13 +76,18 @@ export default function Admin() {
       <div className="flex items-center gap-4 bg-card p-4 rounded-xl border border-border">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-2.5 text-muted-foreground" size={18} />
-          <Input placeholder="Buscar por nome ou e-mail..." className="pl-10" />
+          <Input 
+            placeholder="Buscar por nome ou e-mail..." 
+            className="pl-10" 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
         <Button onClick={handleOpenCreateModal}>Adicionar Usuário</Button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {users.map((user) => (
+        {filteredUsers.length > 0 ? filteredUsers.map((user) => (
           <Card key={user.id} className="group border-primary/5 hover:border-primary/20 transition-all">
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
@@ -132,7 +145,11 @@ export default function Admin() {
               </div>
             </CardContent>
           </Card>
-        ))}
+        )) : (
+          <div className="col-span-full py-12 text-center text-muted-foreground">
+            Nenhum usuário encontrado para "{searchTerm}".
+          </div>
+        )}
       </div>
 
       <Modal 

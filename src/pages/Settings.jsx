@@ -1,11 +1,32 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
+import { Modal } from '../components/ui/Modal';
+import { ProfileForm } from '../components/settings/ProfileForm';
+import { PasswordForm } from '../components/settings/PasswordForm';
 import { User, Bell, Shield, Moon, Sun } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 
 export default function Settings() {
   const { theme, toggleTheme } = useTheme();
+  const { user } = useAuth();
+  
+  const [activeModal, setActiveModal] = useState(null); // 'profile' | 'password' | null
+
+  const handleProfileSubmit = (data) => {
+    console.log('Update profile:', data);
+    // Na Fase 2 implementaremos a chamada real
+    setActiveModal(null);
+    alert('Perfil atualizado com sucesso!');
+  };
+
+  const handlePasswordSubmit = (data) => {
+    console.log('Change password:', data);
+    // Na Fase 2 implementaremos a chamada real
+    setActiveModal(null);
+    alert('Senha alterada com sucesso!');
+  };
 
   return (
     <div className="space-y-8">
@@ -26,13 +47,15 @@ export default function Settings() {
           <CardContent className="space-y-4">
             <div className="space-y-1">
               <p className="text-sm font-medium">Nome</p>
-              <p className="text-sm text-muted-foreground">Johnathan Amorim</p>
+              <p className="text-sm text-muted-foreground">{user?.name || 'Johnathan Amorim'}</p>
             </div>
             <div className="space-y-1">
               <p className="text-sm font-medium">E-mail</p>
-              <p className="text-sm text-muted-foreground">admin@teste.com</p>
+              <p className="text-sm text-muted-foreground">{user?.email || 'admin@teste.com'}</p>
             </div>
-            <Button variant="outline" size="sm">Editar Perfil</Button>
+            <Button variant="outline" size="sm" onClick={() => setActiveModal('profile')}>
+              Editar Perfil
+            </Button>
           </CardContent>
         </Card>
 
@@ -76,10 +99,39 @@ export default function Settings() {
             <CardDescription>Proteja sua conta.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Button variant="outline" size="sm">Alterar Senha</Button>
+            <Button variant="outline" size="sm" onClick={() => setActiveModal('password')}>
+              Alterar Senha
+            </Button>
           </CardContent>
         </Card>
       </div>
+
+      {/* Modais */}
+      <Modal
+        isOpen={activeModal === 'profile'}
+        onClose={() => setActiveModal(null)}
+        title="Editar Perfil"
+      >
+        <ProfileForm 
+          onSubmit={handleProfileSubmit}
+          onCancel={() => setActiveModal(null)}
+          defaultValues={{
+            name: user?.name || 'Johnathan Amorim',
+            email: user?.email || 'admin@teste.com'
+          }}
+        />
+      </Modal>
+
+      <Modal
+        isOpen={activeModal === 'password'}
+        onClose={() => setActiveModal(null)}
+        title="Alterar Senha"
+      >
+        <PasswordForm 
+          onSubmit={handlePasswordSubmit}
+          onCancel={() => setActiveModal(null)}
+        />
+      </Modal>
     </div>
   );
 }
