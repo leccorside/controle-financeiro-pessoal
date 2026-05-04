@@ -19,6 +19,26 @@ const getAIInsights = async (req, res) => {
 
     const transactions = await prisma.transaction.findMany({ where });
     
+    // SE NÃO HOUVER TRANSAÇÕES, NÃO CHAMA A IA
+    if (transactions.length === 0) {
+      return res.json({ 
+        insights: ["Ainda não temos dados suficientes para gerar insights. Comece cadastrando suas primeiras transações!"],
+        status: 'no_data' 
+      });
+    }
+
+    // Verificar se a API Key está configurada antes de chamar o serviço
+    const provider = process.env.AI_PROVIDER || 'gemini';
+    const hasApiKey = (provider === 'openai' && process.env.OPENAI_API_KEY) || 
+                      (provider === 'gemini' && process.env.GEMINI_API_KEY);
+
+    if (!hasApiKey) {
+      return res.json({
+        insights: ["Para receber dicas da IA, configure sua API Key do Gemini ou OpenAI no arquivo .env do servidor."],
+        status: 'no_config'
+      });
+    }
+
     // Calcular resumo para o prompt
     const summary = transactions.reduce((acc, t) => {
       if (t.type === 'INCOME') acc.income += t.amount;
