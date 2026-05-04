@@ -11,14 +11,35 @@ export default function Transactions() {
   const { transactions, addTransaction, removeTransaction, updateTransaction } = useTransactions();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  
+  const [filters, setFilters] = useState({
+    searchTerm: '',
+    month: 'all',
+    year: '2026',
+    type: 'all',
+    category: 'all'
+  });
 
   const filteredTransactions = useMemo(() => {
-    return transactions.filter(t => 
-      t.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      t.category.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [transactions, searchTerm]);
+    return transactions.filter(t => {
+      // Busca por texto
+      const matchesSearch = t.description.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
+                          t.category.toLowerCase().includes(filters.searchTerm.toLowerCase());
+      
+      // Filtro de Tipo
+      const matchesType = filters.type === 'all' || t.type === filters.type;
+      
+      // Filtro de Categoria
+      const matchesCategory = filters.category === 'all' || t.category === filters.category;
+      
+      // Filtro de Mês e Ano
+      const date = new Date(t.date);
+      const matchesMonth = filters.month === 'all' || date.getMonth().toString() === filters.month;
+      const matchesYear = filters.year === 'all' || date.getFullYear().toString() === filters.year;
+
+      return matchesSearch && matchesType && matchesCategory && matchesMonth && matchesYear;
+    });
+  }, [transactions, filters]);
 
   const handleOpenCreateModal = () => {
     setEditingTransaction(null);
@@ -47,7 +68,7 @@ export default function Transactions() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
           <h2 className="text-3xl font-bold font-heading tracking-tight">Transações</h2>
           <p className="text-muted-foreground">Gerencie seu histórico financeiro detalhado.</p>
@@ -64,7 +85,7 @@ export default function Transactions() {
         </div>
       </div>
 
-      <TransactionFilters searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+      <TransactionFilters filters={filters} setFilters={setFilters} />
 
       <TransactionTable 
         transactions={filteredTransactions} 
