@@ -24,6 +24,7 @@ const register = async (req, res) => {
 
     res.status(201).json({ message: 'Usuário criado com sucesso!' });
   } catch (error) {
+    console.error('Erro no registro:', error);
     res.status(500).json({ error: 'Erro ao registrar usuário.' });
   }
 };
@@ -58,6 +59,7 @@ const login = async (req, res) => {
       }
     });
   } catch (error) {
+    console.error('Erro no login:', error);
     res.status(500).json({ error: 'Erro ao realizar login.' });
   }
 };

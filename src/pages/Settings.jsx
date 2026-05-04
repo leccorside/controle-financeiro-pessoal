@@ -10,22 +10,29 @@ import { useAuth } from '../context/AuthContext';
 
 export default function Settings() {
   const { theme, toggleTheme } = useTheme();
-  const { user } = useAuth();
+  const { user, updateProfile } = useAuth();
   
   const [activeModal, setActiveModal] = useState(null); // 'profile' | 'password' | null
 
-  const handleProfileSubmit = (data) => {
-    console.log('Update profile:', data);
-    // Na Fase 2 implementaremos a chamada real
-    setActiveModal(null);
-    alert('Perfil atualizado com sucesso!');
+  const handleProfileSubmit = async (data) => {
+    try {
+      await updateProfile(data);
+      setActiveModal(null);
+      alert('Perfil atualizado com sucesso!');
+    } catch (error) {
+      alert(error.message || 'Erro ao atualizar perfil');
+    }
   };
 
-  const handlePasswordSubmit = (data) => {
-    console.log('Change password:', data);
-    // Na Fase 2 implementaremos a chamada real
-    setActiveModal(null);
-    alert('Senha alterada com sucesso!');
+  const handlePasswordSubmit = async (data) => {
+    try {
+      // Reutiliza o updateProfile para trocar a senha
+      await updateProfile({ password: data.newPassword });
+      setActiveModal(null);
+      alert('Senha alterada com sucesso!');
+    } catch (error) {
+      alert(error.message || 'Erro ao alterar senha');
+    }
   };
 
   return (
@@ -47,11 +54,11 @@ export default function Settings() {
           <CardContent className="space-y-4">
             <div className="space-y-1">
               <p className="text-sm font-medium">Nome</p>
-              <p className="text-sm text-muted-foreground">{user?.name || 'Johnathan Amorim'}</p>
+              <p className="text-sm text-muted-foreground">{user?.name}</p>
             </div>
             <div className="space-y-1">
               <p className="text-sm font-medium">E-mail</p>
-              <p className="text-sm text-muted-foreground">{user?.email || 'admin@teste.com'}</p>
+              <p className="text-sm text-muted-foreground">{user?.email}</p>
             </div>
             <Button variant="outline" size="sm" onClick={() => setActiveModal('profile')}>
               Editar Perfil
@@ -86,7 +93,7 @@ export default function Settings() {
             <CardDescription>Escolha como deseja ser avisado.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground italic">Opções de notificação serão ativadas na Fase 2.</p>
+            <p className="text-sm text-muted-foreground italic text-blue-500">Notificações por e-mail ativadas automaticamente.</p>
           </CardContent>
         </Card>
 
@@ -116,8 +123,8 @@ export default function Settings() {
           onSubmit={handleProfileSubmit}
           onCancel={() => setActiveModal(null)}
           defaultValues={{
-            name: user?.name || 'Johnathan Amorim',
-            email: user?.email || 'admin@teste.com'
+            name: user?.name,
+            email: user?.email
           }}
         />
       </Modal>

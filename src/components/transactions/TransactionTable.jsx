@@ -78,7 +78,7 @@ export function TransactionTable({ transactions, onEdit, onDelete }) {
                 </td>
                 <td className="px-6 py-4">
                   <span className="px-2 py-1 rounded-md bg-secondary text-xs text-secondary-foreground border border-border">
-                    {transaction.category}
+                    {transaction.category?.name || 'Sem categoria'}
                   </span>
                 </td>
                 <td className="px-6 py-4">

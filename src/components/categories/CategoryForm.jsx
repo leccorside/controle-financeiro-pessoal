@@ -17,7 +17,8 @@ const categorySchema = z.object({
 const availableIcons = [
   'Briefcase', 'Utensils', 'Home', 'Palmtree', 'Activity', 
   'ShoppingBag', 'Car', 'Plane', 'Book', 'Music', 
-  'Smartphone', 'CreditCard', 'Gift', 'Coffee', 'TrendingUp', 'PieChart', 'Wallet'
+  'Smartphone', 'CreditCard', 'Gift', 'Coffee', 'TrendingUp', 'PieChart', 'Wallet',
+  'Volleyball', 'Shirt', 'Pill', 'Dumbbell', 'Sparkles'
 ];
 
 const availableColors = [

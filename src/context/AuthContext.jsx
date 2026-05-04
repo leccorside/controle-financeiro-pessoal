@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import api from '../services/api';
 
 const AuthContext = createContext();
 
@@ -7,42 +8,51 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simular verificação de sessão mockada
-    const savedUser = localStorage.getItem('user');
-    if (savedUser) {
+    const savedUser = localStorage.getItem('@FinanceiroPro:user');
+    const token = localStorage.getItem('@FinanceiroPro:token');
+
+    if (savedUser && token) {
       setUser(JSON.parse(savedUser));
     }
     setLoading(false);
   }, []);
 
   const login = async (email, password) => {
-    // Mock de login
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (email && password) {
-          const mockUser = { 
-            id: '1', 
-            name: 'John Doe', 
-            email, 
-            role: email.includes('admin') ? 'ADMIN' : 'USER' 
-          };
-          setUser(mockUser);
-          localStorage.setItem('user', JSON.stringify(mockUser));
-          resolve(mockUser);
-        } else {
-          reject(new Error('Credenciais inválidas'));
-        }
-      }, 1000);
-    });
+    try {
+      const response = await api.post('/auth/login', { email, password });
+      const { token, user: userData } = response.data;
+
+      localStorage.setItem('@FinanceiroPro:token', token);
+      localStorage.setItem('@FinanceiroPro:user', JSON.stringify(userData));
+      
+      setUser(userData);
+      return userData;
+    } catch (error) {
+      throw new Error(error.response?.data?.error || 'Erro ao realizar login');
+    }
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('user');
+    localStorage.removeItem('@FinanceiroPro:token');
+    localStorage.removeItem('@FinanceiroPro:user');
+  };
+
+  const updateProfile = async (data) => {
+    try {
+      const response = await api.put('/users/profile', data);
+      const updatedUser = response.data;
+      
+      localStorage.setItem('@FinanceiroPro:user', JSON.stringify(updatedUser));
+      setUser(updatedUser);
+      return updatedUser;
+    } catch (error) {
+      throw new Error(error.response?.data?.error || 'Erro ao atualizar perfil');
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={{ user, login, logout, updateProfile, loading, isAuthenticated: !!user }}>
       {children}
     </AuthContext.Provider>
   );

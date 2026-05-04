@@ -9,9 +9,13 @@ import * as LucideIcons from 'lucide-react';
 import { cn } from '../services/utils';
 
 export default function Categories() {
-  const { categories, addCategory, removeCategory, updateCategory } = useCategories();
+  const { categories, fetchCategories, addCategory, removeCategory, updateCategory } = useCategories();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
+
+  React.useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
 
   const handleOpenCreateModal = () => {
     setEditingCategory(null);

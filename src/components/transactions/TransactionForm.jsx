@@ -1,21 +1,24 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { cn } from '../../services/utils';
+import { useCategories } from '../../hooks/useCategories';
 
 const transactionSchema = z.object({
   description: z.string().min(3, 'A descrição deve ter pelo menos 3 caracteres'),
   amount: z.string().min(1, 'O valor é obrigatório'),
   type: z.enum(['INCOME', 'EXPENSE', 'INVESTMENT']),
-  category: z.string().min(1, 'A categoria é obrigatória'),
+  categoryId: z.string().min(1, 'A categoria é obrigatória'),
   status: z.enum(['PAID', 'PENDING', 'OVERDUE']),
   date: z.string().min(1, 'A data é obrigatória'),
 });
 
 export function TransactionForm({ onSubmit, defaultValues, onCancel }) {
+  const { categories, fetchCategories } = useCategories();
+
   const {
     register,
     handleSubmit,
@@ -23,7 +26,11 @@ export function TransactionForm({ onSubmit, defaultValues, onCancel }) {
     watch
   } = useForm({
     resolver: zodResolver(transactionSchema),
-    defaultValues: defaultValues || {
+    defaultValues: defaultValues ? {
+      ...defaultValues,
+      amount: defaultValues.amount.toString(),
+      date: new Date(defaultValues.date).toISOString().split('T')[0]
+    } : {
       type: 'EXPENSE',
       status: 'PENDING',
       date: new Date().toISOString().split('T')[0],
@@ -32,11 +39,12 @@ export function TransactionForm({ onSubmit, defaultValues, onCancel }) {
 
   const type = watch('type');
 
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
+
   const handleFormSubmit = (data) => {
-    onSubmit({
-      ...data,
-      amount: parseFloat(data.amount),
-    });
+    onSubmit(data);
   };
 
   return (
@@ -88,19 +96,15 @@ export function TransactionForm({ onSubmit, defaultValues, onCancel }) {
         <div className="space-y-2">
           <label className="text-sm font-medium">Categoria</label>
           <select 
-            {...register('category')}
+            {...register('categoryId')}
             className="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <option value="">Selecione...</option>
-            <option value="Trabalho">Trabalho</option>
-            <option value="Alimentação">Alimentação</option>
-            <option value="Moradia">Moradia</option>
-            <option value="Lazer">Lazer</option>
-            <option value="Transporte">Transporte</option>
-            <option value="Saúde">Saúde</option>
-            <option value="Investimentos">Investimentos</option>
+            {categories.filter(c => c.type === type || !c.userId).map(cat => (
+              <option key={cat.id} value={cat.id}>{cat.name}</option>
+            ))}
           </select>
-          {errors.category && <p className="text-xs text-destructive">{errors.category.message}</p>}
+          {errors.categoryId && <p className="text-xs text-destructive">{errors.categoryId.message}</p>}
         </div>
         <div className="space-y-2">
           <label className="text-sm font-medium">Status</label>

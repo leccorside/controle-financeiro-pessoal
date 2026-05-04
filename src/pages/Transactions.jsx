@@ -8,7 +8,7 @@ import { Modal } from '../components/ui/Modal';
 import { Plus, Download } from 'lucide-react';
 
 export default function Transactions() {
-  const { transactions, addTransaction, removeTransaction, updateTransaction } = useTransactions();
+  const { transactions, fetchTransactions, addTransaction, removeTransaction, updateTransaction } = useTransactions();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState(null);
   
@@ -21,29 +21,19 @@ export default function Transactions() {
     status: 'all'
   });
 
+  // Buscar dados da API sempre que os filtros mudarem
+  React.useEffect(() => {
+    fetchTransactions(filters);
+  }, [fetchTransactions, filters.month, filters.year, filters.type, filters.category, filters.status]);
+
   const filteredTransactions = useMemo(() => {
+    // A filtragem por searchTerm ainda é feita no client para ser instantânea
     return transactions.filter(t => {
-      // Busca por texto
       const matchesSearch = t.description.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
-                          t.category.toLowerCase().includes(filters.searchTerm.toLowerCase());
-      
-      // Filtro de Tipo
-      const matchesType = filters.type === 'all' || t.type === filters.type;
-      
-      // Filtro de Categoria
-      const matchesCategory = filters.category === 'all' || t.category === filters.category;
-
-      // Filtro de Status
-      const matchesStatus = filters.status === 'all' || t.status === filters.status;
-      
-      // Filtro de Mês e Ano
-      const date = new Date(t.date);
-      const matchesMonth = filters.month === 'all' || date.getMonth().toString() === filters.month;
-      const matchesYear = filters.year === 'all' || date.getFullYear().toString() === filters.year;
-
-      return matchesSearch && matchesType && matchesCategory && matchesStatus && matchesMonth && matchesYear;
+                          t.category.name?.toLowerCase().includes(filters.searchTerm.toLowerCase());
+      return matchesSearch;
     });
-  }, [transactions, filters]);
+  }, [transactions, filters.searchTerm]);
 
   const handleOpenCreateModal = () => {
     setEditingTransaction(null);
