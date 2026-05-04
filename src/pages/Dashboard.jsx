@@ -231,8 +231,8 @@ export default function Dashboard() {
             </div>
             <CardDescription>Distribuição das suas despesas neste período.</CardDescription>
           </CardHeader>
-          <CardContent className="h-[350px] flex flex-col md:flex-row items-center gap-4">
-            <div className="flex flex-col justify-center gap-3 pl-4 min-w-[150px]">
+          <CardContent className="h-[350px] flex flex-row items-center gap-2 md:gap-4 overflow-hidden">
+            <div className="flex flex-col justify-center gap-3 pl-2 md:pl-4 min-w-[100px] md:min-w-[150px]">
               {currentData.categorySpending.map((category) => (
                 <div key={category.name} className="flex items-center gap-3 group cursor-default">
                   <div className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: category.color }} />
@@ -243,15 +243,15 @@ export default function Dashboard() {
               ))}
             </div>
             
-            <div className="flex-1 w-full h-full min-h-[250px]">
+            <div className="flex-1 h-full min-h-[200px] md:min-h-[250px] flex items-center justify-center">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={currentData.categorySpending}
                     cx="50%"
                     cy="50%"
-                    innerRadius={70}
-                    outerRadius={100}
+                    innerRadius={55}
+                    outerRadius={80}
                     paddingAngle={5}
                     dataKey="value"
                   >
