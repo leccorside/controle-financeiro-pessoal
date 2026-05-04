@@ -1,5 +1,6 @@
 import React from 'react';
 import { SummaryCard } from '../components/dashboard/SummaryCard';
+import { AIInsights } from '../components/dashboard/AIInsights';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui/Card';
 import { 
   TrendingUp, 
@@ -168,23 +169,7 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      {/* Insight Rápido (Preview do Passo 9) */}
-      <Card className="bg-primary/5 border-primary/20">
-        <CardContent className="p-6">
-          <div className="flex items-start gap-4">
-            <div className="p-2 rounded-lg bg-primary/20 text-primary">
-              <TrendingDown size={20} />
-            </div>
-            <div className="space-y-1">
-              <h4 className="font-semibold text-sm">Insight Inteligente</h4>
-              <p className="text-sm text-muted-foreground">
-                Seus gastos com <span className="text-primary font-medium">Alimentação</span> subiram 15% esta semana. 
-                Tente reduzir refeições fora para economizar cerca de R$300 até o fim do mês.
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <AIInsights />
     </div>
   );
 }
