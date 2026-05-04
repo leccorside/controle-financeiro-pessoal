@@ -11,6 +11,7 @@ const transactionSchema = z.object({
   amount: z.string().min(1, 'O valor é obrigatório'),
   type: z.enum(['INCOME', 'EXPENSE', 'INVESTMENT']),
   category: z.string().min(1, 'A categoria é obrigatória'),
+  status: z.enum(['PAID', 'PENDING', 'OVERDUE']),
   date: z.string().min(1, 'A data é obrigatória'),
 });
 
@@ -24,6 +25,7 @@ export function TransactionForm({ onSubmit, defaultValues, onCancel }) {
     resolver: zodResolver(transactionSchema),
     defaultValues: defaultValues || {
       type: 'EXPENSE',
+      status: 'PENDING',
       date: new Date().toISOString().split('T')[0],
     },
   });
@@ -76,28 +78,42 @@ export function TransactionForm({ onSubmit, defaultValues, onCancel }) {
           {errors.amount && <p className="text-xs text-destructive">{errors.amount.message}</p>}
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-medium">Data</label>
+          <label className="text-sm font-medium">Vencimento</label>
           <Input type="date" {...register('date')} />
           {errors.date && <p className="text-xs text-destructive">{errors.date.message}</p>}
         </div>
       </div>
 
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Categoria</label>
-        <select 
-          {...register('category')}
-          className="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          <option value="">Selecione...</option>
-          <option value="Trabalho">Trabalho</option>
-          <option value="Alimentação">Alimentação</option>
-          <option value="Moradia">Moradia</option>
-          <option value="Lazer">Lazer</option>
-          <option value="Transporte">Transporte</option>
-          <option value="Saúde">Saúde</option>
-          <option value="Investimentos">Investimentos</option>
-        </select>
-        {errors.category && <p className="text-xs text-destructive">{errors.category.message}</p>}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Categoria</label>
+          <select 
+            {...register('category')}
+            className="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <option value="">Selecione...</option>
+            <option value="Trabalho">Trabalho</option>
+            <option value="Alimentação">Alimentação</option>
+            <option value="Moradia">Moradia</option>
+            <option value="Lazer">Lazer</option>
+            <option value="Transporte">Transporte</option>
+            <option value="Saúde">Saúde</option>
+            <option value="Investimentos">Investimentos</option>
+          </select>
+          {errors.category && <p className="text-xs text-destructive">{errors.category.message}</p>}
+        </div>
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Status</label>
+          <select 
+            {...register('status')}
+            className="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <option value="PAID">PAGO</option>
+            <option value="PENDING">PENDENTE</option>
+            <option value="OVERDUE">ATRASADO</option>
+          </select>
+          {errors.status && <p className="text-xs text-destructive">{errors.status.message}</p>}
+        </div>
       </div>
 
       <div className="flex gap-3 pt-4">

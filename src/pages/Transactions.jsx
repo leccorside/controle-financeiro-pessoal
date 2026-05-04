@@ -17,7 +17,8 @@ export default function Transactions() {
     month: 'all',
     year: '2026',
     type: 'all',
-    category: 'all'
+    category: 'all',
+    status: 'all'
   });
 
   const filteredTransactions = useMemo(() => {
@@ -31,13 +32,16 @@ export default function Transactions() {
       
       // Filtro de Categoria
       const matchesCategory = filters.category === 'all' || t.category === filters.category;
+
+      // Filtro de Status
+      const matchesStatus = filters.status === 'all' || t.status === filters.status;
       
       // Filtro de Mês e Ano
       const date = new Date(t.date);
       const matchesMonth = filters.month === 'all' || date.getMonth().toString() === filters.month;
       const matchesYear = filters.year === 'all' || date.getFullYear().toString() === filters.year;
 
-      return matchesSearch && matchesType && matchesCategory && matchesMonth && matchesYear;
+      return matchesSearch && matchesType && matchesCategory && matchesStatus && matchesMonth && matchesYear;
     });
   }, [transactions, filters]);
 

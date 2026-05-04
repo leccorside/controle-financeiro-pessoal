@@ -2,8 +2,11 @@ import React from 'react';
 import { cn } from '../../services/utils';
 import { ArrowUpCircle, ArrowDownCircle, TrendingUp, Edit2, Trash2 } from 'lucide-react';
 import { Button } from '../ui/Button';
+import { useTransactions } from '../../hooks/useTransactions';
 
 export function TransactionTable({ transactions, onEdit, onDelete }) {
+  const { updateTransaction } = useTransactions();
+
   const getIcon = (type) => {
     switch (type) {
       case 'INCOME': return <ArrowUpCircle className="text-success" size={16} />;
@@ -31,6 +34,19 @@ export function TransactionTable({ transactions, onEdit, onDelete }) {
     }
   };
 
+  const getStatusStyles = (status) => {
+    switch (status) {
+      case 'PAID': return 'bg-success/10 text-success border-success/20';
+      case 'PENDING': return 'bg-warning/10 text-warning border-warning/20';
+      case 'OVERDUE': return 'bg-destructive/10 text-destructive border-destructive/20';
+      default: return 'bg-secondary text-secondary-foreground';
+    }
+  };
+
+  const handleStatusChange = (id, newStatus) => {
+    updateTransaction(id, { status: newStatus });
+  };
+
   return (
     <div className="w-full overflow-x-auto rounded-xl border border-border bg-card">
       <table className="w-full text-sm text-left border-collapse">
@@ -39,7 +55,8 @@ export function TransactionTable({ transactions, onEdit, onDelete }) {
             <th className="px-6 py-4 font-semibold">Descrição</th>
             <th className="px-6 py-4 font-semibold">Tipo</th>
             <th className="px-6 py-4 font-semibold">Categoria</th>
-            <th className="px-6 py-4 font-semibold">Data</th>
+            <th className="px-6 py-4 font-semibold">Status</th>
+            <th className="px-6 py-4 font-semibold">Vencimento</th>
             <th className="px-6 py-4 font-semibold text-right">Valor</th>
             <th className="px-6 py-4 font-semibold text-center">Ações</th>
           </tr>
@@ -63,6 +80,20 @@ export function TransactionTable({ transactions, onEdit, onDelete }) {
                   <span className="px-2 py-1 rounded-md bg-secondary text-xs text-secondary-foreground border border-border">
                     {transaction.category}
                   </span>
+                </td>
+                <td className="px-6 py-4">
+                  <select
+                    value={transaction.status || 'PENDING'}
+                    onChange={(e) => handleStatusChange(transaction.id, e.target.value)}
+                    className={cn(
+                      "text-[10px] font-bold px-2 py-1 rounded-full border transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none text-center min-w-[80px]",
+                      getStatusStyles(transaction.status)
+                    )}
+                  >
+                    <option value="PAID">PAGO</option>
+                    <option value="PENDING">PENDENTE</option>
+                    <option value="OVERDUE">ATRASADO</option>
+                  </select>
                 </td>
                 <td className="px-6 py-4 text-muted-foreground">
                   {new Date(transaction.date).toLocaleDateString('pt-BR')}
@@ -99,7 +130,7 @@ export function TransactionTable({ transactions, onEdit, onDelete }) {
             ))
           ) : (
             <tr>
-              <td colSpan="6" className="px-6 py-12 text-center text-muted-foreground">
+              <td colSpan="7" className="px-6 py-12 text-center text-muted-foreground">
                 Nenhuma transação encontrada.
               </td>
             </tr>
