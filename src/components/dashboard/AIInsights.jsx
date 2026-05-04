@@ -32,7 +32,7 @@ const mockInsights = [
 
 export function AIInsights() {
   return (
-    <Card className="border-primary/20 bg-primary/5 relative overflow-hidden">
+    <Card className="border-primary/20 bg-primary/5 text-card-foreground relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute -top-12 -right-12 w-32 h-32 bg-primary/10 rounded-full blur-3xl" />
       

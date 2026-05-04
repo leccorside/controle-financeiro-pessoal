@@ -19,11 +19,7 @@ import {
   ResponsiveContainer,
   PieChart,
   Pie,
-  Cell,
-  LineChart,
-  Line,
-  AreaChart,
-  Area
+  Cell
 } from 'recharts';
 
 const mockData = {
@@ -83,7 +79,7 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Gráfico de Evolução Mensal */}
-        <Card className="border-primary/5">
+        <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
               <BarChartIcon size={20} className="text-primary" />
@@ -94,25 +90,26 @@ export default function Dashboard() {
           <CardContent className="h-[350px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={mockData.monthlyEvolution}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#27272a" />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" opacity={0.5} />
                 <XAxis 
                   dataKey="name" 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fill: '#a1a1aa', fontSize: 12 }}
+                  tick={{ fill: 'var(--muted-foreground)', fontSize: 12 }}
                 />
                 <YAxis 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fill: '#a1a1aa', fontSize: 12 }}
+                  tick={{ fill: 'var(--muted-foreground)', fontSize: 12 }}
                   tickFormatter={(value) => `R$${value}`}
                 />
                 <Tooltip 
-                  cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                  cursor={{ fill: 'var(--secondary)', opacity: 0.2 }}
                   contentStyle={{ 
-                    backgroundColor: '#18181b', 
-                    border: '1px solid #27272a',
-                    borderRadius: '8px'
+                    backgroundColor: 'var(--card)', 
+                    border: '1px solid var(--border)',
+                    borderRadius: '8px',
+                    color: 'var(--foreground)'
                   }}
                   itemStyle={{ fontSize: '12px' }}
                 />
@@ -124,7 +121,7 @@ export default function Dashboard() {
         </Card>
 
         {/* Gráfico de Gastos por Categoria */}
-        <Card className="border-primary/5">
+        <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
               <PieChartIcon size={20} className="text-primary" />
@@ -150,9 +147,10 @@ export default function Dashboard() {
                 </Pie>
                 <Tooltip 
                   contentStyle={{ 
-                    backgroundColor: '#18181b', 
-                    border: '1px solid #27272a',
-                    borderRadius: '8px'
+                    backgroundColor: 'var(--card)', 
+                    border: '1px solid var(--border)',
+                    borderRadius: '8px',
+                    color: 'var(--foreground)'
                   }}
                 />
               </PieChart>

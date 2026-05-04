@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import { User, Shield, Trash2, Mail, Calendar, Search } from 'lucide-react';
+import { Modal } from '../components/ui/Modal';
+import { UserForm } from '../components/admin/UserForm';
+import { User, Shield, Trash2, Mail, Calendar, Search, Edit2 } from 'lucide-react';
 import { cn } from '../services/utils';
 
 const mockUsers = [
@@ -14,6 +16,32 @@ const mockUsers = [
 
 export default function Admin() {
   const [users, setUsers] = useState(mockUsers);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
+
+  const handleOpenCreateModal = () => {
+    setEditingUser(null);
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEditModal = (user) => {
+    setEditingUser(user);
+    setIsModalOpen(true);
+  };
+
+  const handleSubmit = (data) => {
+    if (editingUser) {
+      setUsers(users.map(u => u.id === editingUser.id ? { ...u, ...data } : u));
+    } else {
+      const newUser = {
+        ...data,
+        id: Math.random().toString(36).substr(2, 9),
+        createdAt: new Date().toISOString().split('T')[0]
+      };
+      setUsers([...users, newUser]);
+    }
+    setIsModalOpen(false);
+  };
 
   const toggleRole = (userId) => {
     setUsers(users.map(u => {
@@ -42,10 +70,10 @@ export default function Admin() {
           <Search className="absolute left-3 top-2.5 text-muted-foreground" size={18} />
           <Input placeholder="Buscar por nome ou e-mail..." className="pl-10" />
         </div>
-        <Button>Adicionar Usuário</Button>
+        <Button onClick={handleOpenCreateModal}>Adicionar Usuário</Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {users.map((user) => (
           <Card key={user.id} className="group border-primary/5 hover:border-primary/20 transition-all">
             <CardContent className="p-6">
@@ -87,6 +115,14 @@ export default function Admin() {
                   <Button 
                     variant="ghost" 
                     size="icon" 
+                    className="h-8 w-8 text-muted-foreground hover:text-primary"
+                    onClick={() => handleOpenEditModal(user)}
+                  >
+                    <Edit2 size={16} />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
                     className="h-8 w-8 text-muted-foreground hover:text-destructive"
                     onClick={() => deleteUser(user.id)}
                   >
@@ -98,6 +134,18 @@ export default function Admin() {
           </Card>
         ))}
       </div>
+
+      <Modal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)}
+        title={editingUser ? 'Editar Usuário' : 'Adicionar Novo Usuário'}
+      >
+        <UserForm 
+          onSubmit={handleSubmit}
+          onCancel={() => setIsModalOpen(false)}
+          defaultValues={editingUser}
+        />
+      </Modal>
     </div>
   );
 }

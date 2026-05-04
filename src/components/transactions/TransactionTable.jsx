@@ -55,7 +55,7 @@ export function TransactionTable({ transactions, onEdit, onDelete }) {
                   {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(transaction.amount)}
                 </td>
                 <td className="px-6 py-4 text-center">
-                  <div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex items-center justify-center gap-2">
                     <Button 
                       variant="ghost" 
                       size="icon" 
