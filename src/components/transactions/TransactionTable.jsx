@@ -47,6 +47,14 @@ export function TransactionTable({ transactions, onEdit, onDelete }) {
     updateTransaction(id, { status: newStatus });
   };
 
+  const isOverdue = (transaction) => {
+    if (transaction.status === 'PAID') return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const transactionDate = new Date(transaction.date);
+    return transactionDate < today && transaction.status === 'PENDING';
+  };
+
   return (
     <div className="w-full">
       {/* Desktop Table */}
@@ -66,7 +74,13 @@ export function TransactionTable({ transactions, onEdit, onDelete }) {
           <tbody className="divide-y divide-border">
             {transactions.length > 0 ? (
               transactions.map((transaction) => (
-                <tr key={transaction.id} className="hover:bg-primary/5 transition-colors group">
+                <tr 
+                  key={transaction.id} 
+                  className={cn(
+                    "hover:bg-primary/5 transition-colors group",
+                    isOverdue(transaction) && "bg-destructive/5 hover:bg-destructive/10"
+                  )}
+                >
                   <td className="px-6 py-4">
                     <span className="font-medium text-foreground">{transaction.description}</span>
                   </td>
@@ -97,7 +111,7 @@ export function TransactionTable({ transactions, onEdit, onDelete }) {
                       <option value="OVERDUE">ATRASADO</option>
                     </select>
                   </td>
-                  <td className="px-6 py-4 text-muted-foreground">
+                  <td className={cn("px-6 py-4", isOverdue(transaction) ? "text-destructive font-bold" : "text-muted-foreground")}>
                     {new Date(transaction.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}
                   </td>
                   <td className={cn(
@@ -149,6 +163,7 @@ export function TransactionTable({ transactions, onEdit, onDelete }) {
               key={transaction.id} 
               className={cn(
                 "bg-card/40 backdrop-blur-sm border border-border/60 rounded-xl p-4 shadow-md active:scale-[0.99] transition-all opacity-0 animate-fade-in",
+                isOverdue(transaction) && "bg-destructive/10 border-destructive/30 shadow-destructive/5",
                 index < 5 && `animate-stagger-${index + 1}`
               )}
             >
@@ -157,7 +172,10 @@ export function TransactionTable({ transactions, onEdit, onDelete }) {
                   <h3 className="text-base font-bold uppercase tracking-tight text-foreground truncate font-heading">
                     {transaction.description}
                   </h3>
-                  <p className="text-[10px] text-muted-foreground font-semibold tracking-wider">
+                  <p className={cn(
+                    "text-[10px] font-semibold tracking-wider",
+                    isOverdue(transaction) ? "text-destructive" : "text-muted-foreground"
+                  )}>
                     {new Date(transaction.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}
                   </p>
                 </div>

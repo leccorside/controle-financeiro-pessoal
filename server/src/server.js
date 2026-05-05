@@ -8,6 +8,8 @@ const categoryRoutes = require('./routes/categoryRoutes');
 const transactionRoutes = require('./routes/transactionRoutes');
 const aiRoutes = require('./routes/aiRoutes');
 const userRoutes = require('./routes/userRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
+require('./services/cronService');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -27,6 +29,7 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'Financeiro Pro API is running' });
@@ -37,3 +40,5 @@ app.listen(PORT, () => {
 });
 
 module.exports = app;
+
+

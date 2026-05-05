@@ -4,16 +4,32 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Modal } from '../components/ui/Modal';
 import { UserForm } from '../components/admin/UserForm';
-import { User, Shield, Trash2, Mail, Calendar, Search, Edit2, Loader2 } from 'lucide-react';
+import { NotificationForm } from '../components/admin/NotificationForm';
+import { User, Shield, Trash2, Mail, Calendar, Search, Edit2, Loader2, Bell } from 'lucide-react';
 import api from '../services/api';
 import { cn } from '../services/utils';
 
 export default function Admin() {
+  const [activeTab, setActiveTab] = useState('users');
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isSendingNotification, setIsSendingNotification] = useState(false);
+  const [isRunningOverdueJob, setIsRunningOverdueJob] = useState(false);
+
+  const handleRunOverdueJob = async () => {
+    setIsRunningOverdueJob(true);
+    try {
+      const response = await api.post('/notifications/run-overdue-job');
+      alert(response.data.message);
+    } catch (error) {
+      alert(error.response?.data?.error || 'Erro ao executar o job');
+    } finally {
+      setIsRunningOverdueJob(false);
+    }
+  };
 
   const fetchUsers = useCallback(async () => {
     setIsLoading(true);
@@ -63,6 +79,20 @@ export default function Admin() {
     }
   };
 
+  const handleSendNotification = async (data) => {
+    setIsSendingNotification(true);
+    try {
+      await api.post('/notifications/send-custom', data);
+      alert('Notificações enviadas com sucesso!');
+      return true;
+    } catch (error) {
+      alert(error.response?.data?.error || 'Erro ao enviar notificações');
+      return false;
+    } finally {
+      setIsSendingNotification(false);
+    }
+  };
+
   const toggleRole = async (user) => {
     try {
       const newRole = user.role === 'ADMIN' ? 'USER' : 'ADMIN';
@@ -86,99 +116,160 @@ export default function Admin() {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col gap-2">
-        <h2 className="text-3xl font-bold font-heading tracking-tight">Painel Administrativo</h2>
-        <p className="text-muted-foreground">Gerencie os usuários do sistema e suas permissões.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-3xl font-bold font-heading tracking-tight">Painel Administrativo</h2>
+          <p className="text-muted-foreground">Gerencie o sistema e seus usuários.</p>
+        </div>
+
+        <div className="flex bg-secondary p-1 rounded-lg">
+          <button 
+            onClick={() => setActiveTab('users')}
+            className={cn(
+              "px-4 py-2 text-sm font-medium rounded-md transition-all",
+              activeTab === 'users' ? "bg-background text-primary shadow-sm" : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            Usuários
+          </button>
+          <button 
+            onClick={() => setActiveTab('notifications')}
+            className={cn(
+              "px-4 py-2 text-sm font-medium rounded-md transition-all",
+              activeTab === 'notifications' ? "bg-background text-primary shadow-sm" : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            Notificações Push
+          </button>
+        </div>
       </div>
 
-      <div className="flex items-center gap-4 bg-card p-4 rounded-xl border border-border">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-2.5 text-muted-foreground" size={18} />
-          <Input 
-            placeholder="Buscar por nome ou e-mail..." 
-            className="pl-10" 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-        <Button onClick={handleOpenCreateModal}>Adicionar Usuário</Button>
-      </div>
+      {activeTab === 'users' ? (
+        <div className="space-y-6">
+          <div className="flex items-center gap-4 bg-card p-4 rounded-xl border border-border">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-2.5 text-muted-foreground" size={18} />
+              <Input 
+                placeholder="Buscar por nome ou e-mail..." 
+                className="pl-10" 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <Button onClick={handleOpenCreateModal}>Adicionar Usuário</Button>
+          </div>
 
-      {isLoading ? (
-        <div className="flex flex-col items-center justify-center py-24 gap-4">
-          <Loader2 className="text-primary animate-spin" size={48} />
-          <p className="text-muted-foreground">Carregando usuários...</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {filteredUsers.length > 0 ? filteredUsers.map((user) => (
-            <Card key={user.id} className="group border-primary/5 hover:border-primary/20 transition-all">
-              <CardContent className="p-6">
-                <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
-                  <div className="flex gap-4">
-                    <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center text-muted-foreground shrink-0 overflow-hidden">
-                      <User size={24} />
-                    </div>
-                    <div className="space-y-1">
-                      <h3 className="font-bold flex items-center gap-2">
-                        {user.name}
-                        {user.role === 'ADMIN' && (
-                          <Shield size={14} className="text-primary" />
-                        )}
-                      </h3>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <Mail size={12} />
-                        {user.email}
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center py-24 gap-4">
+              <Loader2 className="text-primary animate-spin" size={48} />
+              <p className="text-muted-foreground">Carregando usuários...</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {filteredUsers.length > 0 ? filteredUsers.map((user) => (
+                <Card key={user.id} className="group border-primary/5 hover:border-primary/20 transition-all">
+                  <CardContent className="p-6">
+                    <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
+                      <div className="flex gap-4">
+                        <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center text-muted-foreground shrink-0 overflow-hidden">
+                          <User size={24} />
+                        </div>
+                        <div className="space-y-1">
+                          <h3 className="font-bold flex items-center gap-2">
+                            {user.name}
+                            {user.role === 'ADMIN' && (
+                              <Shield size={14} className="text-primary" />
+                            )}
+                          </h3>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <Mail size={12} />
+                            {user.email}
+                          </div>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <Calendar size={12} />
+                            Membro desde {user.createdAt ? new Date(user.createdAt).toLocaleDateString('pt-BR') : 'Data não disponível'}
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <Calendar size={12} />
-                        Membro desde {user.createdAt ? new Date(user.createdAt).toLocaleDateString('pt-BR') : 'Data não disponível'}
-                      </div>
-                    </div>
-                  </div>
 
-                  <div className="flex flex-col-reverse sm:flex-row items-end sm:items-start gap-2 w-full sm:w-auto">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className={cn(
-                        "text-xs gap-2 w-full sm:w-auto justify-center",
-                        user.role === 'ADMIN' ? "text-primary border-primary/20 bg-primary/5" : ""
-                      )}
-                      onClick={() => toggleRole(user)}
-                    >
-                      <Shield size={14} />
-                      {user.role === 'ADMIN' ? 'Admin' : 'Tornar Admin'}
-                    </Button>
-                    
-                    <div className="flex gap-2 justify-end w-full sm:w-auto">
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-8 w-8 text-muted-foreground hover:text-primary"
-                        onClick={() => handleOpenEditModal(user)}
-                      >
-                        <Edit2 size={16} />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                        onClick={() => handleDeleteUser(user.id)}
-                      >
-                        <Trash2 size={16} />
-                      </Button>
+                      <div className="flex flex-col-reverse sm:flex-row items-end sm:items-start gap-2 w-full sm:w-auto">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className={cn(
+                            "text-xs gap-2 w-full sm:w-auto justify-center",
+                            user.role === 'ADMIN' ? "text-primary border-primary/20 bg-primary/5" : ""
+                          )}
+                          onClick={() => toggleRole(user)}
+                        >
+                          <Shield size={14} />
+                          {user.role === 'ADMIN' ? 'Admin' : 'Tornar Admin'}
+                        </Button>
+                        
+                        <div className="flex gap-2 justify-end w-full sm:w-auto">
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8 text-muted-foreground hover:text-primary"
+                            onClick={() => handleOpenEditModal(user)}
+                          >
+                            <Edit2 size={16} />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                            onClick={() => handleDeleteUser(user.id)}
+                          >
+                            <Trash2 size={16} />
+                          </Button>
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  </CardContent>
+                </Card>
+              )) : (
+                <div className="col-span-full py-12 text-center text-muted-foreground">
+                  Nenhum usuário encontrado para "{searchTerm}".
                 </div>
-              </CardContent>
-            </Card>
-          )) : (
-            <div className="col-span-full py-12 text-center text-muted-foreground">
-              Nenhum usuário encontrado para "{searchTerm}".
+              )}
             </div>
           )}
         </div>
+      ) : (
+        <Card className="max-w-2xl mx-auto border-primary/10">
+          <CardHeader>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-primary/10 text-primary shrink-0">
+                  <Bell size={24} />
+                </div>
+                <div>
+                  <CardTitle>Enviar Notificação Push</CardTitle>
+                  <CardDescription>
+                    Envie uma mensagem em tempo real para todos os usuários.
+                  </CardDescription>
+                </div>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="gap-2 w-full sm:w-auto justify-center"
+                onClick={handleRunOverdueJob}
+                disabled={isRunningOverdueJob}
+              >
+                {isRunningOverdueJob ? <Loader2 size={16} className="animate-spin" /> : <Shield size={16} />}
+                Verificar Atrasos Agora
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <NotificationForm 
+              onSubmit={handleSendNotification} 
+              isLoading={isSendingNotification} 
+            />
+          </CardContent>
+        </Card>
       )}
 
       <Modal 
@@ -195,3 +286,4 @@ export default function Admin() {
     </div>
   );
 }
+

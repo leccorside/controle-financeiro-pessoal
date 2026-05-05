@@ -1,39 +1,33 @@
-datasource db {
-  provider = "postgresql"
-}
-
 generator client {
   provider = "prisma-client-js"
 }
 
-model User {
-  id        String   @id @default(uuid())
-  name      String
-  email     String   @unique
-  password  String
-  role      Role     @default(USER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  categories   Category[]
-  transactions Transaction[]
+datasource db {
+  provider = "postgresql"
 }
 
-enum Role {
-  USER
-  ADMIN
+model User {
+  id                String             @id @default(uuid())
+  name              String
+  email             String             @unique
+  password          String
+  role              Role               @default(USER)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  categories        Category[]
+  pushSubscriptions PushSubscription[]
+  transactions      Transaction[]
 }
 
 model Category {
-  id        String   @id @default(uuid())
-  name      String
-  type      TransactionType
-  color     String
-  icon      String
-  userId    String?  // Nullable se for uma categoria global
-  user      User?    @relation(fields: [userId], references: [id])
-  createdAt DateTime @default(now())
-
+  id           String          @id @default(uuid())
+  name         String
+  type         TransactionType
+  color        String
+  icon         String
+  userId       String?
+  createdAt    DateTime        @default(now())
+  user         User?           @relation(fields: [userId], references: [id])
   transactions Transaction[]
 }
 
@@ -45,11 +39,26 @@ model Transaction {
   status      TransactionStatus @default(PENDING)
   date        DateTime
   userId      String
-  user        User              @relation(fields: [userId], references: [id])
   categoryId  String
-  category    Category          @relation(fields: [categoryId], references: [id])
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
+  category    Category          @relation(fields: [categoryId], references: [id])
+  user        User              @relation(fields: [userId], references: [id])
+}
+
+model PushSubscription {
+  id        String   @id @default(uuid())
+  endpoint  String   @unique
+  auth      String
+  p256dh    String
+  userId    String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+enum Role {
+  USER
+  ADMIN
 }
 
 enum TransactionType {

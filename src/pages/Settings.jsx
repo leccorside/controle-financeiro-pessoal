@@ -7,10 +7,19 @@ import { PasswordForm } from '../components/settings/PasswordForm';
 import { User, Bell, Shield, Moon, Sun } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
+import { usePushNotifications } from '../hooks/usePushNotifications';
+import { Loader2 } from 'lucide-react';
 
 export default function Settings() {
   const { theme, toggleTheme } = useTheme();
   const { user, updateProfile } = useAuth();
+  const { 
+    isSupported, 
+    isSubscribed, 
+    subscribe, 
+    unsubscribe, 
+    loading: pushLoading 
+  } = usePushNotifications();
   
   const [activeModal, setActiveModal] = useState(null); // 'profile' | 'password' | null
 
@@ -93,6 +102,33 @@ export default function Settings() {
             <CardDescription>Escolha como deseja ser avisado.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <p className="text-sm font-medium">Notificações Push</p>
+                <p className="text-xs text-muted-foreground">
+                  Receba avisos de contas atrasadas e alertas do sistema.
+                </p>
+              </div>
+              {isSupported ? (
+                <Button 
+                  variant={isSubscribed ? "destructive" : "primary"} 
+                  size="sm" 
+                  onClick={isSubscribed ? unsubscribe : subscribe}
+                  disabled={pushLoading}
+                  className="min-w-[120px]"
+                >
+                  {pushLoading ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : isSubscribed ? (
+                    'Desativar'
+                  ) : (
+                    'Ativar'
+                  )}
+                </Button>
+              ) : (
+                <p className="text-xs text-destructive">Não suportado neste navegador</p>
+              )}
+            </div>
             <p className="text-sm text-muted-foreground italic text-blue-500">Notificações por e-mail ativadas automaticamente.</p>
           </CardContent>
         </Card>
