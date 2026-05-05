@@ -11,18 +11,20 @@ export default function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { login } = useAuth();
+  const { register: registerUser } = useAuth();
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setError('');
     
     try {
-      // Simular registro chamando login mockado
-      await login(email, password);
+      await registerUser(name, email, password);
       navigate('/');
     } catch (err) {
+      setError(err.message);
       console.error(err);
     } finally {
       setIsSubmitting(false);
@@ -44,6 +46,11 @@ export default function Register() {
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
+            {error && (
+              <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-xs font-medium text-center animate-in fade-in zoom-in duration-300">
+                {error}
+              </div>
+            )}
             <div className="space-y-2">
               <label className="text-sm font-medium">Nome Completo</label>
               <div className="relative">

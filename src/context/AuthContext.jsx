@@ -32,6 +32,16 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const register = async (name, email, password) => {
+    try {
+      await api.post('/auth/register', { name, email, password });
+      // Após registrar, faz login automático
+      return await login(email, password);
+    } catch (error) {
+      throw new Error(error.response?.data?.error || 'Erro ao criar conta');
+    }
+  };
+
   const logout = () => {
     setUser(null);
     localStorage.removeItem('@FinanceiroPro:token');
@@ -52,7 +62,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, updateProfile, loading, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={{ user, login, register, logout, updateProfile, loading, isAuthenticated: !!user }}>
       {children}
     </AuthContext.Provider>
   );

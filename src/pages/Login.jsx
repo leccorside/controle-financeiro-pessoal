@@ -23,7 +23,7 @@ export default function Login() {
       await login(email, password);
       navigate('/');
     } catch (err) {
-      setError('E-mail ou senha inválidos. Tente admin@teste.com');
+      setError(err.message);
     } finally {
       setIsSubmitting(false);
     }

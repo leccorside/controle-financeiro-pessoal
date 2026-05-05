@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const register = async (req, res) => {
+  console.log('[Auth] Recebendo tentativa de registro para:', req.body.email);
   try {
     const { name, email, password } = req.body;
 
@@ -30,6 +31,7 @@ const register = async (req, res) => {
 };
 
 const login = async (req, res) => {
+  console.log('[Auth] Recebendo tentativa de login para:', req.body.email);
   try {
     const { email, password } = req.body;
 
