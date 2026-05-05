@@ -272,15 +272,18 @@ export default function Transactions() {
         onDelete={handleDelete}
       />
 
-      <div className="flex items-center justify-between text-sm text-muted-foreground px-2">
-        <p>
-          Mostrando {paginatedTransactions.length} de {filteredTransactions.length} transações 
-          {totalPages > 1 && ` (Página ${currentPage} de ${totalPages})`}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground px-2 pb-8 sm:pb-0">
+        <p className="order-2 sm:order-1 text-center sm:text-left">
+          Mostrando <span className="font-medium text-foreground">{paginatedTransactions.length}</span> de <span className="font-medium text-foreground">{filteredTransactions.length}</span> transações 
+          {totalPages > 1 && (
+            <span className="block sm:inline"> (Página {currentPage} de {totalPages})</span>
+          )}
         </p>
-        <div className="flex gap-2">
+        <div className="flex gap-2 order-1 sm:order-2 w-full sm:w-auto">
           <Button 
             variant="outline" 
             size="sm" 
+            className="flex-1 sm:flex-none h-10 px-4"
             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
             disabled={currentPage === 1}
           >
@@ -289,6 +292,7 @@ export default function Transactions() {
           <Button 
             variant="outline" 
             size="sm" 
+            className="flex-1 sm:flex-none h-10 px-4"
             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
             disabled={currentPage === totalPages || totalPages === 0}
           >
@@ -296,6 +300,7 @@ export default function Transactions() {
           </Button>
         </div>
       </div>
+
 
       <Modal 
         isOpen={isModalOpen} 
