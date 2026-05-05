@@ -59,4 +59,78 @@ const sendTemporaryPasswordEmail = async (email, tempPassword) => {
   }
 };
 
-module.exports = { sendTemporaryPasswordEmail };
+const sendMonthlyReport = async (user, monthData) => {
+  const { income, expense, categories, month } = monthData;
+  const balance = income - expense;
+  
+  const transporter = nodemailer.createTransport({
+    host: process.env.EMAIL_HOST,
+    port: process.env.EMAIL_PORT,
+    secure: parseInt(process.env.EMAIL_PORT) === 465,
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+
+  const categoriesHtml = Object.entries(categories)
+    .sort((a,b) => b[1] - a[1])
+    .map(([name, value]) => `
+      <tr>
+        <td style="padding: 8px; border-bottom: 1px solid #eee;">${name}</td>
+        <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">
+          ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)}
+        </td>
+      </tr>
+    `).join('');
+
+  const mailOptions = {
+    from: `"Financeiro Pro" <${process.env.EMAIL_USER}>`,
+    to: user.email,
+    subject: `📊 Seu Relatório Mensal de ${month} está pronto!`,
+    html: `
+      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px; background-color: #ffffff; border-radius: 16px; border: 1px solid #e5e7eb;">
+        <h1 style="color: #6366f1; margin-bottom: 24px;">Relatório Mensal - Financeiro Pro</h1>
+        <p>Olá, <strong>${user.name}</strong>! Aqui está o resumo das suas finanças em <strong>${month}</strong>.</p>
+        
+        <div style="background: #f8fafc; padding: 24px; border-radius: 12px; margin: 24px 0; border: 1px solid #e2e8f0;">
+          <table width="100%">
+            <tr>
+              <td style="padding: 4px 0;">Receitas:</td>
+              <td style="text-align: right; color: #10b981; font-weight: bold;">
+                ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(income)}
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 4px 0;">Despesas:</td>
+              <td style="text-align: right; color: #ef4444; font-weight: bold;">
+                ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(expense)}
+              </td>
+            </tr>
+            <tr style="font-size: 1.2em;">
+              <td style="padding-top: 12px; border-top: 1px solid #cbd5e1;">Saldo:</td>
+              <td style="text-align: right; padding-top: 12px; border-top: 1px solid #cbd5e1; font-weight: bold; color: ${balance >= 0 ? '#10b981' : '#ef4444'};">
+                ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(balance)}
+              </td>
+            </tr>
+          </table>
+        </div>
+
+        <h3 style="color: #1e293b; margin-bottom: 16px;">Maiores Gastos por Categoria</h3>
+        <table width="100%" style="border-collapse: collapse;">
+          ${categoriesHtml}
+        </table>
+
+        <div style="margin-top: 40px; text-align: center;">
+          <a href="${process.env.APP_URL || 'http://localhost:5173'}" style="background-color: #6366f1; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
+            Ver Dashboard Completo
+          </a>
+        </div>
+      </div>
+    `,
+  };
+
+  return transporter.sendMail(mailOptions);
+};
+
+module.exports = { sendTemporaryPasswordEmail, sendMonthlyReport };

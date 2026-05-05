@@ -9,6 +9,7 @@ const transactionRoutes = require('./routes/transactionRoutes');
 const aiRoutes = require('./routes/aiRoutes');
 const userRoutes = require('./routes/userRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
+const reportRoutes = require('./routes/reportRoutes');
 require('./services/cronService');
 
 const app = express();
@@ -30,6 +31,7 @@ app.use('/api/transactions', transactionRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/reports', reportRoutes);
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'Financeiro Pro API is running' });

@@ -77,11 +77,67 @@ async function checkOverdueExpenses() {
   }
 }
 
-// Agendar para rodar todos os dias às 09:00 da manhã
-// '0 9 * * *'
-// Para testes, podemos colocar para rodar a cada minuto: '* * * * *'
-// Mas vamos manter o padrão diário e deixar uma nota.
+/**
+ * Job para enviar relatórios mensais consolidado no dia 1º
+ */
+async function sendMonthlyReports() {
+  console.log('[CRON] Gerando relatórios mensais...');
+  
+  try {
+    const { startOfMonth, subMonths, endOfMonth, format } = require('date-fns');
+    const { ptBR } = require('date-fns/locale');
+    const { sendMonthlyReport } = require('./emailService');
+
+    const lastMonthDate = subMonths(new Date(), 1);
+    const startDate = startOfMonth(lastMonthDate);
+    const endDate = endOfMonth(lastMonthDate);
+    const monthLabel = format(lastMonthDate, 'MMMM/yyyy', { locale: ptBR });
+
+    const users = await prisma.user.findMany();
+
+    for (const user of users) {
+      const transactions = await prisma.transaction.findMany({
+        where: {
+          userId: user.id,
+          date: {
+            gte: startDate,
+            lte: endDate
+          }
+        },
+        include: { category: true }
+      });
+
+      if (transactions.length === 0) continue;
+
+      const reportData = {
+        month: monthLabel,
+        income: 0,
+        expense: 0,
+        categories: {}
+      };
+
+      transactions.forEach(t => {
+        if (t.type === 'INCOME') reportData.income += Number(t.amount);
+        else if (t.type === 'EXPENSE') {
+          reportData.expense += Number(t.amount);
+          const catName = t.category?.name || 'Outros';
+          reportData.categories[catName] = (reportData.categories[catName] || 0) + Number(t.amount);
+        }
+      });
+
+      await sendMonthlyReport(user, reportData);
+    }
+    
+    console.log('[CRON] Todos os relatórios mensais foram enviados.');
+  } catch (error) {
+    console.error('[CRON] Erro ao enviar relatórios mensais:', error);
+  }
+}
+
+// Job Diário: Alertas de atraso (09:00)
 cron.schedule('0 9 * * *', checkOverdueExpenses);
 
-// Exportar para inicialização manual se necessário
-module.exports = { checkOverdueExpenses };
+// Job Mensal: Relatórios Consolidado (Dia 1º às 08:00)
+cron.schedule('0 8 1 * *', sendMonthlyReports);
+
+module.exports = { checkOverdueExpenses, sendMonthlyReports };

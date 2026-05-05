@@ -6,6 +6,7 @@ import Transactions from './pages/Transactions';
 import Categories from './pages/Categories';
 import Settings from './pages/Settings';
 import Admin from './pages/Admin';
+import Reports from './pages/Reports';
 import Login from './pages/Login';
 import Register from './pages/Register';
 
@@ -29,6 +30,7 @@ function App() {
           <Route index element={<Dashboard />} />
           <Route path="transactions" element={<Transactions />} />
           <Route path="categories" element={<Categories />} />
+          <Route path="reports" element={<Reports />} />
           <Route path="settings" element={<Settings />} />
           <Route path="admin" element={<Admin />} />
         </Route>

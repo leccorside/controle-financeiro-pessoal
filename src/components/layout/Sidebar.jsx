@@ -8,6 +8,7 @@ import {
   ChevronLeft, 
   Wallet,
   ShieldCheck,
+  BarChart3,
   X
 } from 'lucide-react';
 import { cn } from '../../services/utils';
@@ -18,6 +19,7 @@ const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
   { icon: ArrowLeftRight, label: 'Transações', path: '/transactions' },
   { icon: Tags, label: 'Categorias', path: '/categories' },
+  { icon: BarChart3, label: 'Relatórios', path: '/reports' },
 ];
 
 export function Sidebar({ isOpen, onClose }) {
