@@ -1,8 +1,16 @@
 const cron = require('node-cron');
 const prisma = require('../lib/prisma');
+const { addDays, startOfDay, endOfDay } = require('date-fns');
 const webpush = require('web-push');
+const fs = require('fs');
+const path = require('path');
 
-// Configurar Web Push (redundante se já configurado no Controller, mas seguro aqui também)
+const logFile = path.join(__dirname, '../../debug_push.log');
+const log = (msg) => {
+  const line = `[${new Date().toISOString()}] ${msg}\n`;
+  fs.appendFileSync(logFile, line);
+  console.log(msg);
+};
 webpush.setVapidDetails(
   process.env.VAPID_SUBJECT || 'mailto:exemplo@email.com',
   process.env.VAPID_PUBLIC_KEY,
@@ -134,10 +142,86 @@ async function sendMonthlyReports() {
   }
 }
 
+/**
+ * Função para buscar despesas que vencem amanhã e notificar usuários (aviso de 1 dia antes)
+ */
+async function checkUpcomingExpenses() {
+  log('--- INICIANDO JOB DE VENCIMENTOS PRÓXIMOS ---');
+  
+  try {
+    const { addDays, startOfDay, endOfDay } = require('date-fns');
+    
+    // Pega o momento atual e calcula até o final do dia de amanhã
+    const now = new Date();
+    const startDate = startOfDay(now);
+    const endDate = endOfDay(addDays(now, 1));
+
+    log(`Buscando despesas entre ${startDate.toISOString()} e ${endDate.toISOString()}`);
+
+    const upcomingTransactions = await prisma.transaction.findMany({
+      where: {
+        status: 'PENDING',
+        type: 'EXPENSE',
+        date: {
+          gte: startDate,
+          lte: endDate
+        }
+      },
+      include: {
+        user: {
+          include: {
+            pushSubscriptions: true
+          }
+        }
+      }
+    });
+
+    log(`Encontradas ${upcomingTransactions.length} despesas para amanhã: ${upcomingTransactions.map(t => t.description).join(', ')}`);
+
+    for (const transaction of upcomingTransactions) {
+      const { user, description, amount } = transaction;
+
+      if (user.pushSubscriptions && user.pushSubscriptions.length > 0) {
+        console.log(`[CRON] Enviando push para usuário ${user.email} (${user.pushSubscriptions.length} inscrições)`);
+        const payload = JSON.stringify({
+          title: '⏰ Vencimento Amanhã!',
+          body: `A despesa "${description}" de R$ ${Number(amount).toFixed(2)} vence amanhã. Não esqueça!`,
+          data: { 
+            url: '/transactions' 
+          },
+          icon: 'favicon.svg'
+        });
+
+        for (const sub of user.pushSubscriptions) {
+          const pushConfig = {
+            endpoint: sub.endpoint,
+            keys: { auth: sub.auth, p256dh: sub.p256dh }
+          };
+
+          webpush.sendNotification(pushConfig, payload)
+            .then(res => log(`Push entregue ao serviço (status: ${res.statusCode}) para ${user.email}`))
+            .catch(err => {
+              if (err.statusCode === 410 || err.statusCode === 404) {
+                log(`Assinatura expirada para ${user.email}, removendo.`);
+                return prisma.pushSubscription.delete({ where: { id: sub.id } });
+              }
+              log(`ERRO ao enviar push para usuário ${user.id}: ${err.message}`);
+            });
+        }
+      }
+    }
+  } catch (error) {
+    console.error('[CRON] Erro ao processar job de vencimentos próximos:', error);
+  }
+}
+
 // Job Diário: Alertas de atraso (09:00)
 cron.schedule('0 9 * * *', checkOverdueExpenses);
+
+// Job Diário: Alertas de vencimento amanhã (08:30)
+cron.schedule('30 8 * * *', checkUpcomingExpenses);
 
 // Job Mensal: Relatórios Consolidado (Dia 1º às 08:00)
 cron.schedule('0 8 1 * *', sendMonthlyReports);
 
-module.exports = { checkOverdueExpenses, sendMonthlyReports };
+module.exports = { checkOverdueExpenses, checkUpcomingExpenses, sendMonthlyReports };

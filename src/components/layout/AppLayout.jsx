@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
+import { NotificationPopup } from '../notifications/NotificationPopup';
 
 export function AppLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -18,6 +19,7 @@ export function AppLayout() {
           </div>
         </main>
       </div>
+      <NotificationPopup />
     </div>
   );
 }

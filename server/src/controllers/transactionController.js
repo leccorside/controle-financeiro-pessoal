@@ -174,10 +174,38 @@ const getSummary = async (req, res) => {
   }
 };
 
+const getUpcomingAlerts = async (req, res) => {
+  try {
+    const { addDays, startOfDay, endOfDay } = require('date-fns');
+    
+    // Alertas de hoje e amanhã (1 dia antes)
+    const tomorrow = addDays(new Date(), 1);
+    
+    const alerts = await prisma.transaction.findMany({
+      where: {
+        userId: req.user.id,
+        status: 'PENDING',
+        type: 'EXPENSE',
+        date: {
+          lte: endOfDay(tomorrow),
+          gte: startOfDay(new Date()) // De hoje em diante
+        }
+      },
+      include: { category: true },
+      orderBy: { date: 'asc' }
+    });
+
+    res.json(alerts);
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao buscar alertas.' });
+  }
+};
+
 module.exports = { 
   getTransactions, 
   createTransaction, 
   updateTransaction, 
   deleteTransaction,
-  getSummary
+  getSummary,
+  getUpcomingAlerts
 };
