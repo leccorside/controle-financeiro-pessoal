@@ -1,6 +1,7 @@
 const prisma = require('../lib/prisma');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { sendTemporaryPasswordEmail } = require('../services/emailService');
 
 const register = async (req, res) => {
   console.log('[Auth] Recebendo tentativa de registro para:', req.body.email);
@@ -66,4 +67,39 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = { register, login };
+const forgotPassword = async (req, res) => {
+  console.log('[Auth] Recebendo tentativa de recuperação de senha para:', req.body.email);
+  try {
+    const { email } = req.body;
+    const user = await prisma.user.findUnique({ where: { email } });
+
+    if (!user) {
+      return res.status(404).json({ error: 'Usuário não encontrado.' });
+    }
+
+    // Gerar senha temporária de 8 caracteres
+    const tempPassword = Math.random().toString(36).slice(-8);
+    const hashedPassword = await bcrypt.hash(tempPassword, 10);
+
+    await prisma.user.update({
+      where: { email },
+      data: { password: hashedPassword }
+    });
+
+    // Envio de e-mail real
+    try {
+      await sendTemporaryPasswordEmail(email, tempPassword);
+    } catch (emailError) {
+      console.warn('[AVISO] Erro ao enviar e-mail real, mas a senha foi alterada no banco:', emailError.message);
+      // Opcional: Você pode optar por logar a senha no console se o e-mail falhar para não travar o usuário no dev
+      console.log(`[BACKUP DEV] Senha para ${email}: ${tempPassword}`);
+    }
+
+    res.json({ message: 'Uma senha temporária foi enviada para o seu e-mail.' });
+  } catch (error) {
+    console.error('Erro na recuperação de senha:', error);
+    res.status(500).json({ error: 'Erro ao processar recuperação de senha.' });
+  }
+};
+
+module.exports = { register, login, forgotPassword };
