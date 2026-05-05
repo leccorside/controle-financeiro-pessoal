@@ -114,7 +114,7 @@ export default function Admin() {
           {filteredUsers.length > 0 ? filteredUsers.map((user) => (
             <Card key={user.id} className="group border-primary/5 hover:border-primary/20 transition-all">
               <CardContent className="p-6">
-                <div className="flex items-start justify-between">
+                <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
                   <div className="flex gap-4">
                     <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center text-muted-foreground shrink-0 overflow-hidden">
                       <User size={24} />
@@ -136,12 +136,13 @@ export default function Admin() {
                       </div>
                     </div>
                   </div>
-                  <div className="flex gap-2">
+
+                  <div className="flex flex-col-reverse sm:flex-row items-end sm:items-start gap-2 w-full sm:w-auto">
                     <Button 
                       variant="outline" 
                       size="sm" 
                       className={cn(
-                        "text-xs gap-2",
+                        "text-xs gap-2 w-full sm:w-auto justify-center",
                         user.role === 'ADMIN' ? "text-primary border-primary/20 bg-primary/5" : ""
                       )}
                       onClick={() => toggleRole(user)}
@@ -149,22 +150,25 @@ export default function Admin() {
                       <Shield size={14} />
                       {user.role === 'ADMIN' ? 'Admin' : 'Tornar Admin'}
                     </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-8 w-8 text-muted-foreground hover:text-primary"
-                      onClick={() => handleOpenEditModal(user)}
-                    >
-                      <Edit2 size={16} />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                      onClick={() => handleDeleteUser(user.id)}
-                    >
-                      <Trash2 size={16} />
-                    </Button>
+                    
+                    <div className="flex gap-2 justify-end w-full sm:w-auto">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8 text-muted-foreground hover:text-primary"
+                        onClick={() => handleOpenEditModal(user)}
+                      >
+                        <Edit2 size={16} />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                        onClick={() => handleDeleteUser(user.id)}
+                      >
+                        <Trash2 size={16} />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </CardContent>
