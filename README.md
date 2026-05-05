@@ -4,79 +4,77 @@ Sistema web moderno e responsivo para controle financeiro pessoal, integrando ge
 
 ![Dashboard Preview](src/assets/hero.png)
 
-## ✨ Funcionalidades (Fase 1 - Frontend)
-
-- **Dashboard Inteligente**: Visão geral de saldo, receitas e despesas com gráficos dinâmicos.
-- **Gráficos de Performance**: Fluxo de caixa mensal e distribuição de gastos por categoria usando Recharts.
-- **Gestão de Transações**: CRUD completo (Criar, Editar, Excluir) com formulários validados.
-- **Categorias Personalizadas**: Gerenciamento de categorias com escolha de cores e ícones.
-- **Insights de IA (Mock)**: Sugestões automáticas para economia e investimentos.
-- **Sistema de Autenticação (Mock)**: Telas de Login/Cadastro com proteção de rotas privadas.
-- **Painel Administrativo**: Gestão de usuários e permissões (Exclusivo para perfis ADMIN).
-- **Design System Premium**:
-  - 🌙 Dark Mode nativo.
-  - 🎨 Paleta de cores sofisticada.
-  - 📱 Layout 100% Responsivo (Mobile First).
+## ✨ Funcionalidades
+- **Dashboard Dinâmico**: Visão geral de saldo, receitas e despesas com gráficos interativos.
+- **Gráficos de Performance**: Fluxo de caixa mensal e distribuição de gastos por categoria.
+- **Gestão Financeira**: Controle total de transações e categorias personalizadas.
+- **Insights com IA Real**: Integração com Groq/Gemini para análise financeira personalizada.
+- **Notificações Push**: 
+  - Alertas automáticos de contas atrasadas via Cron Job.
+  - Envio de notificações personalizadas via Painel Admin.
+  - Controle de ativação nas configurações do usuário.
+- **Sistema de Autenticação**: Login/Cadastro seguro com JWT e proteção de rotas.
+- **Painel Administrativo**: Gestão de usuários, permissões e disparos de notificações.
+- **Design System Premium**: Dark mode nativo e interface 100% responsiva.
 
 ## 🚀 Tecnologias Utilizadas
-
-- **Core**: [React.js](https://reactjs.org/) + [Vite](https://vitejs.dev/)
-- **Estilização**: [Tailwind CSS v4](https://tailwindcss.com/)
-- **Gerenciamento de Estado**: [Zustand](https://github.com/pmndrs/zustand)
-- **Roteamento**: [React Router v6](https://reactrouter.com/)
-- **Formulários**: [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/)
-- **Gráficos**: [Recharts](https://recharts.org/)
-- **Ícones**: [Lucide React](https://lucide.dev/)
-- **Tipografia**: Google Fonts (Inter & Outfit)
+- **Frontend**: [React.js](https://reactjs.org/), [Vite](https://vitejs.dev/), [Tailwind CSS v4](https://tailwindcss.com/), [Zustand](https://github.com/pmndrs/zustand).
+- **Backend**: [Node.js](https://nodejs.org/), [Express](https://expressjs.com/), [Prisma ORM](https://www.prisma.io/).
+- **Banco de Dados**: [PostgreSQL](https://www.postgresql.org/) (via [Neon.tech](https://neon.tech/)).
+- **IA**: [Groq](https://groq.com/) / [Google Gemini](https://ai.google.dev/).
+- **Notificações**: [Web Push API](https://developer.mozilla.org/en-US/docs/Web/API/Push_API).
 
 ## 📦 Como Instalar e Rodar
 
 ### Pré-requisitos
-
-- [Node.js](https://nodejs.org/) (versão 18 ou superior)
-- [NPM](https://www.npmjs.com/) ou [Yarn](https://yarnpkg.com/)
+- [Node.js](https://nodejs.org/) (v18+)
+- [PostgreSQL](https://www.postgresql.org/) (ou conta no Neon.tech)
 
 ### Passo a Passo
 
-1. **Clonar o repositório**
-
+1. **Clonar e Instalar**
    ```bash
    git clone https://github.com/leccorside/controle-financeiro-pessoal.git
    cd controle-financeiro
-   ```
-
-2. **Instalar dependências**
-
-   ```bash
    npm install
+   cd server && npm install
    ```
 
-3. **Rodar o projeto em modo desenvolvimento**
-
-   ```bash
-   npm run dev
+2. **Configurar Variáveis de Ambiente**
+   Crie um arquivo `.env` na pasta `server/` com as chaves:
+   ```env
+   DATABASE_URL=...
+   JWT_SECRET=...
+   GROQ_API_KEY=...
+   VAPID_PUBLIC_KEY=...
+   VAPID_PRIVATE_KEY=...
+   VAPID_SUBJECT=mailto:seu@email.com
    ```
 
-4. **Acessar no navegador**
-   Abra [http://localhost:5173](http://localhost:5173) para visualizar o projeto.
+3. **Rodar o Projeto**
+   - Frontend: `npm run dev` (na raiz)
+   - Backend: `npm run dev` (na pasta `/server`)
 
 ---
 
 ## 🛠️ Roadmap de Desenvolvimento
 
 ### FASE 1: Frontend & UI (Concluído ✅)
-
 - [x] Estrutura base e Design System.
 - [x] Dashboards e Gráficos.
-- [x] CRUDs com dados mockados.
 
-### FASE 2: Backend & Integração (Próxima Etapa 🚧)
+### FASE 2: Backend & Integração (Concluído ✅)
+- [x] Setup Node.js + Prisma + PostgreSQL (Neon).
+- [x] API de Autenticação Real (JWT).
+- [x] Integração com IA Real (Groq/Gemini).
+- [x] Deploy em Produção (Vercel/Neon).
 
-- [ ] Setup Node.js + Prisma + PostgreSQL.
-- [ ] API de Autenticação Real (JWT).
-- [ ] Endpoints de Transações e Categorias.
-- [ ] Integração com IA Real (OpenAI/Gemini).
-- [ ] Deploy em Produção (Vercel/Neon).
+### FASE 3: Funcionalidades Avançadas (Em andamento 🚀)
+- [x] Implementação de Notificações Push.
+- [x] Cron Job para automação de alertas.
+- [x] Destaque visual de transações atrasadas.
+- [ ] Relatórios avançados de exportação.
+- [ ] Metas de economia personalizadas.
 
 ---
 
